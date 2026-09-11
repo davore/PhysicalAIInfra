@@ -1,0 +1,9 @@
+{
+  "scenario_id": "lerobot-aloha-transfer-cube-ep0",
+  "scenario_hash": "sha256:92fdfb10d2dd8a2170532940cc2b76491c0f0632e0eef89fcf199fd8f8a0e442",
+  "adapter": "python-policy",
+  "mode": "open_loop",
+  "target_version": "act-example",
+  "git_sha": "deadbeef",
+  "host": "local"
+}

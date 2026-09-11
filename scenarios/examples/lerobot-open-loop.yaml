@@ -1,0 +1,28 @@
+schema_version: 0
+id: lerobot-aloha-transfer-cube-ep0
+blocking: true
+source:
+  kind: lerobot
+  dataset: lerobot/aloha_sim_transfer_cube_human
+  episode_index: 0
+  frame_from: 0
+  frame_to: 8
+tags: [aloha, grasp, open-loop, example]
+inputs:
+  - observation.images.top
+  - observation.state
+target:
+  adapter: python-policy
+  entry: lerobot.common.policies.act:ACTPolicy
+  checkpoint: lerobot/act_aloha_sim_transfer_cube_human
+expected:
+  - type: action_deviation
+    topic: action
+    reference: recorded
+    max_l2: 0.05
+  - type: latency
+    topic: /policy/action
+    p95_ms: 80
+  - type: confidence_floor
+    topic: /policy/action
+    min_confidence: 0.3

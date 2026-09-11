@@ -1,0 +1,27 @@
+schema_version: 0
+id: mcap-wrist-cam-open-loop
+blocking: false
+source:
+  kind: mcap
+  mcap: s3://fleet-logs/example/2026-09-10T14-32.mcap
+  from_ns: 1757514722000000000
+  to_ns: 1757514732000000000
+  foxglove_url: https://app.foxglove.dev/example
+tags: [mcap, open-loop, example]
+inputs:
+  - /camera/wrist/image_raw
+  - /joint_states
+target:
+  adapter: python-policy
+  entry: policies.act:load
+expected:
+  - type: action_deviation
+    topic: action
+    reference: recorded
+    max_l2: 0.05
+  - type: latency
+    topic: /policy/action
+    p95_ms: 80
+  - type: confidence_floor
+    topic: /policy/action
+    min_confidence: 0.3

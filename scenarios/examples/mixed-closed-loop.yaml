@@ -1,0 +1,24 @@
+schema_version: 0
+id: mixed-open-and-closed
+blocking: true
+source:
+  kind: lerobot
+  dataset: lerobot/aloha_sim_transfer_cube_human
+  episode_index: 0
+  frame_from: 0
+  frame_to: 8
+tags: [aloha, mixed, example]
+inputs:
+  - observation.state
+target:
+  adapter: python-policy
+  entry: lerobot.common.policies.act:ACTPolicy
+expected:
+  - type: action_deviation
+    topic: action
+    reference: recorded
+    max_l2: 0.05
+  - type: grasp_success
+    topic: /gripper/state
+    within_s: 8.0
+  - type: no_collision
