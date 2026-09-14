@@ -22,3 +22,7 @@ runs/*
 !runs/examples/
 !runs/examples/**
 !runs/.gitkeep
+
+slices/
+results/
+.cache/

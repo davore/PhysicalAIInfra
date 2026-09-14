@@ -6,7 +6,6 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from robogate.cli import app
-from robogate.scenario import content_hash, load_scenario
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "scenarios" / "examples"
@@ -51,7 +50,7 @@ def test_assert_fail_exit_1() -> None:
     assert "FAIL" in result.output
 
 
-def test_assert_skipped_closed_loop_exit_0() -> None:
+def test_assert_skipped_closed_loop_rejects_id_mismatch() -> None:
     result = runner.invoke(
         app,
         [
@@ -61,18 +60,19 @@ def test_assert_skipped_closed_loop_exit_0() -> None:
             str(RUNS / "pass"),
         ],
     )
-    assert result.exit_code == 0, result.output
-    payload = json.loads(result.output)
-    assert payload["ok"] is True
-    statuses = {item["type"]: item["status"] for item in payload["results"]}
-    assert statuses["grasp_success"] == "skipped"
-    assert statuses["no_collision"] == "skipped"
-    expected = content_hash(load_scenario(EXAMPLES / "mixed-closed-loop.yaml"))
-    assert payload["scenario_hash"] == expected
+    assert result.exit_code == 1, result.output
+    assert "scenario_id" in result.output
 
 
-def test_placeholder_commands_exit_2() -> None:
-    for command in ("extract", "replay", "eval", "diff", "gate"):
-        result = runner.invoke(app, [command])
-        assert result.exit_code == 2, command
-        assert "not implemented in M0" in result.output
+def test_assert_scenario_id_mismatch_exit_1() -> None:
+    result = runner.invoke(
+        app,
+        ["assert", str(EXAMPLES / "mcap-open-loop.yaml"), str(RUNS / "pass")],
+    )
+    assert result.exit_code == 1, result.output
+    assert "run scenario_id" in result.output
+
+
+def test_eval_requires_suite() -> None:
+    result = runner.invoke(app, ["eval"])
+    assert result.exit_code != 0

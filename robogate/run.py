@@ -24,8 +24,14 @@ class RunMeta(BaseModel):
     adapter: str
     mode: RunMode
     target_version: str | None = None
+    target_revision: str | None = None
     git_sha: str | None = None
     host: str | None = None
+    device: str | None = None
+    adapter_versions: dict[str, str] | None = None
+    dataset_revision: str | None = None
+    policy_config: dict[str, Any] | None = None
+    perturbations: list[str] | None = None
 
 
 class Run:
@@ -41,6 +47,9 @@ class Run:
     def output_path(self, topic: str, *, recorded: bool = False) -> Path:
         name = topic_filename(topic, recorded=recorded)
         return self.path / "outputs" / name
+
+    def has_output(self, topic: str, *, recorded: bool = False) -> bool:
+        return self.output_path(topic, recorded=recorded).is_file()
 
     def output(self, topic: str, *, recorded: bool = False) -> pl.DataFrame:
         path = self.output_path(topic, recorded=recorded)

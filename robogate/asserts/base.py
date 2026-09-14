@@ -16,6 +16,7 @@ class Status(StrEnum):
     PASS = "pass"
     FAIL = "fail"
     SKIPPED = "skipped"
+    ERROR = "error"
 
 
 class AssertResult(BaseModel):

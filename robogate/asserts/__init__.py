@@ -1,8 +1,15 @@
-"""Run registered assertions. Any fail is a suite failure; skipped is not."""
+"""Run registered assertions. Any fail or error is a suite failure; skipped is not."""
 
 from __future__ import annotations
 
-from robogate.asserts import action_deviation, closed_loop, confidence_floor, latency  # noqa: F401
+from robogate.asserts import (  # noqa: F401
+    action_bounds,
+    action_deviation,
+    action_smoothness,
+    closed_loop,
+    confidence_floor,
+    latency,
+)
 from robogate.asserts.base import (
     Assertion,
     AssertResult,
@@ -34,12 +41,22 @@ def run_assertions(scenario: Scenario, run: Run) -> list[AssertResult]:
         if skipped is not None:
             results.append(skipped)
             continue
-        results.append(assertion.evaluate(run, spec))
+        try:
+            results.append(assertion.evaluate(run, spec))
+        except Exception as exc:  # noqa: BLE001 — fail-closed, never crash the CLI
+            results.append(
+                AssertResult(
+                    type=spec.type,
+                    status=Status.ERROR,
+                    topic=getattr(spec, "topic", None),
+                    message=f"{type(exc).__name__}: {exc}",
+                )
+            )
     return results
 
 
 def overall_ok(results: list[AssertResult]) -> bool:
-    return all(item.status != Status.FAIL for item in results)
+    return all(item.status not in {Status.FAIL, Status.ERROR} for item in results)
 
 
 __all__ = [

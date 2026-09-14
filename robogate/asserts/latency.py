@@ -26,7 +26,24 @@ class LatencyAssertion(Assertion):
     def evaluate(self, run: Run, spec: Expectation) -> AssertResult:
         if not isinstance(spec, Latency):
             raise TypeError("expected Latency spec")
-        measured = p95_ms(run.output(spec.topic))
+        if not run.has_output(spec.topic):
+            return AssertResult(
+                type=self.type,
+                status=Status.SKIPPED,
+                threshold=spec.p95_ms,
+                topic=spec.topic,
+                message="adapter did not record latency",
+            )
+        df = run.output(spec.topic)
+        if "latency_ms" not in df.columns:
+            return AssertResult(
+                type=self.type,
+                status=Status.SKIPPED,
+                threshold=spec.p95_ms,
+                topic=spec.topic,
+                message="adapter did not record latency",
+            )
+        measured = p95_ms(df)
         note = (
             f"p95={measured:.2f}ms (budget {spec.p95_ms}ms); informational, not blocking"
         )

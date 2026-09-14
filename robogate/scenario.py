@@ -24,6 +24,7 @@ class LeRobotSource(_Strict):
     episode_index: int = Field(ge=0)
     frame_from: int = Field(ge=0)
     frame_to: int = Field(ge=0)
+    revision: str | None = None
     foxglove_url: str | None = None
 
     @model_validator(mode="after")
@@ -71,6 +72,7 @@ class Target(_Strict):
     adapter: Literal["python-policy", "ros2-node", "isaac-lab"]
     entry: str | None = None
     checkpoint: str | None = None
+    revision: str | None = None
 
 
 class ActionDeviation(_Strict):

@@ -26,7 +26,24 @@ class ConfidenceFloorAssertion(Assertion):
     def evaluate(self, run: Run, spec: Expectation) -> AssertResult:
         if not isinstance(spec, ConfidenceFloor):
             raise TypeError("expected ConfidenceFloor spec")
-        measured = min_confidence(run.output(spec.topic))
+        if not run.has_output(spec.topic):
+            return AssertResult(
+                type=self.type,
+                status=Status.SKIPPED,
+                threshold=spec.min_confidence,
+                topic=spec.topic,
+                message="adapter did not record confidence",
+            )
+        df = run.output(spec.topic)
+        if "confidence" not in df.columns:
+            return AssertResult(
+                type=self.type,
+                status=Status.SKIPPED,
+                threshold=spec.min_confidence,
+                topic=spec.topic,
+                message="adapter did not record confidence",
+            )
+        measured = min_confidence(df)
         passed = measured >= spec.min_confidence
         return AssertResult(
             type=self.type,

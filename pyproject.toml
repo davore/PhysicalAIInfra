@@ -17,11 +17,12 @@ dependencies = [
     "numpy>=1.26",
     "polars>=1.0",
     "pyarrow>=16.0",
+    "huggingface_hub>=0.24",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
-lerobot = ["lerobot"]
+lerobot = ["lerobot>=0.4", "torchcodec"]
 mcap = ["mcap", "mcap-ros2-support", "rosbags"]
 report = ["jinja2>=3.1"]
 
