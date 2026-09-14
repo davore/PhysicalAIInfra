@@ -143,7 +143,13 @@ def _worse(left: str, right: str) -> str:
     return left if rank.get(left, 0) >= rank.get(right, 0) else right
 
 
-def find_run(runs_root: Path, scenario_id: str) -> Path:
+def find_run(
+    runs_root: Path,
+    scenario_id: str,
+    *,
+    version_contains: str | None = None,
+    unperturbed: bool = False,
+) -> Path:
     matches: list[Path] = []
     root = Path(runs_root)
     if not root.is_dir():
@@ -153,10 +159,17 @@ def find_run(runs_root: Path, scenario_id: str) -> Path:
             run = Run.load(meta_path.parent)
         except Exception:  # noqa: BLE001
             continue
-        if run.meta.scenario_id == scenario_id:
-            matches.append(meta_path.parent)
+        if run.meta.scenario_id != scenario_id:
+            continue
+        if unperturbed and run.meta.perturbations:
+            continue
+        version = run.meta.target_version or ""
+        if version_contains and version_contains not in version:
+            continue
+        matches.append(meta_path.parent)
     if not matches:
-        raise FileNotFoundError(f"no run for scenario {scenario_id} under {root}")
+        extra = f" matching {version_contains}" if version_contains else ""
+        raise FileNotFoundError(f"no run for scenario {scenario_id}{extra} under {root}")
     return max(matches, key=lambda path: path.stat().st_mtime)
 
 

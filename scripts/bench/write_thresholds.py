@@ -14,10 +14,13 @@ def main() -> None:
     parser.add_argument("suite", type=Path)
     parser.add_argument("--eval", dest="eval_parquet", type=Path, required=True)
     parser.add_argument("--runs", type=Path, default=Path("runs"))
+    parser.add_argument("--slices", type=Path, default=Path("slices"))
     parser.add_argument("--eval-id", default=None)
     args = parser.parse_args()
     eval_id = args.eval_id or args.eval_parquet.stem
-    thresholds = thresholds_from_eval(args.eval_parquet, args.runs, args.suite)
+    thresholds = thresholds_from_eval(
+        args.eval_parquet, args.runs, args.suite, slice_root=args.slices
+    )
     written = write_suite_thresholds(args.suite, thresholds, eval_id=eval_id)
     print(f"ok wrote {len(written)} scenarios max_l2={thresholds['max_l2']}")
 

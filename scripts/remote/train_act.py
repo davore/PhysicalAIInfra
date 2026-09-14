@@ -6,11 +6,13 @@ from __future__ import annotations
 import json
 import os
 import time
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, IterableDataset
 
 
 def _ensure_act_type(dest: Path) -> None:
@@ -67,11 +69,154 @@ def _forward_loss(policy: Any, batch: dict[str, Any]) -> tuple[torch.Tensor, dic
     raise TypeError(f"unexpected policy output type {type(out)}")
 
 
+def _align_action_stats(pipe: Any, action_stats: dict[str, Any], device: str) -> None:
+    """Replace checkpoint action mean/std with the dataset's, then refresh tensors."""
+    if pipe is None or not action_stats:
+        return
+    for step in getattr(pipe, "steps", None) or []:
+        stats = getattr(step, "stats", None)
+        if not isinstance(stats, dict) or "action" not in stats:
+            continue
+        stats["action"] = {key: np.asarray(value) for key, value in action_stats.items()}
+        if hasattr(step, "to"):
+            step.to(device)
+
+
 def _save_processors(preprocessor: Any, postprocessor: Any, dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     for pipe in (preprocessor, postprocessor):
         if pipe is not None and hasattr(pipe, "save_pretrained"):
             pipe.save_pretrained(dest)
+
+
+def _episode_ranges(dataset: Any, episodes: list[int]) -> list[tuple[int, int]]:
+    hf = getattr(dataset, "hf_dataset", None)
+    if hf is not None and "episode_index" in getattr(hf, "column_names", []):
+        idx = np.asarray(hf["episode_index"])
+        ranges: list[tuple[int, int]] = []
+        for ep in episodes:
+            where = np.flatnonzero(idx == ep)
+            if len(where):
+                ranges.append((int(where[0]), int(where[-1]) + 1))
+        if ranges:
+            return ranges
+    n = len(dataset)
+    if not episodes:
+        return [(0, n)]
+    size = max(n // len(episodes), 1)
+    return [(i * size, min((i + 1) * size, n)) for i in range(len(episodes))]
+
+
+def _patch_worker_runtime(_worker_id: int = 0) -> None:
+    """Spawn workers do not inherit the main-process PyAV decoder patch."""
+    from robogate.replay.lerobot_policy import (
+        _isolate_lerobot_imports,
+        _patch_video_decoder,
+        _video_backend,
+    )
+
+    _isolate_lerobot_imports()
+    if _video_backend() != "torchcodec":
+        _patch_video_decoder()
+
+
+class BufferedEpisodeIterable(IterableDataset):
+    """Shuffle episode order, read each episode sequentially, pop from a buffer."""
+
+    def __init__(
+        self,
+        dataset: Any,
+        ranges: list[tuple[int, int]],
+        *,
+        buffer_size: int,
+        seed: int,
+    ) -> None:
+        self.dataset = dataset
+        self.ranges = ranges
+        self.buffer_size = buffer_size
+        self.seed = seed
+
+    def __iter__(self) -> Iterator[dict[str, Any]]:
+        _patch_worker_runtime()
+        info = torch.utils.data.get_worker_info()
+        ranges = list(self.ranges)
+        if info is not None:
+            ranges = ranges[info.id :: info.num_workers]
+            rng = np.random.default_rng(self.seed + info.id)
+        else:
+            rng = np.random.default_rng(self.seed)
+        rng.shuffle(ranges)
+        buf: list[dict[str, Any]] = []
+        while True:
+            for start, stop in ranges:
+                for idx in range(start, stop):
+                    buf.append(self.dataset[idx])
+                    if len(buf) == 1 or len(buf) % 50 == 0:
+                        wid = info.id if info is not None else 0
+                        print(
+                            f"[train] worker {wid} buffer {len(buf)}/{self.buffer_size}",
+                            flush=True,
+                        )
+                    if len(buf) >= self.buffer_size:
+                        j = int(rng.integers(0, len(buf)))
+                        yield buf.pop(j)
+            rng.shuffle(ranges)
+
+
+def _as_numpy(value: Any) -> np.ndarray:
+    if isinstance(value, torch.Tensor):
+        value = value.detach().cpu()
+        if value.ndim > 1 and value.shape[0] == 1:
+            value = value.squeeze(0)
+        return np.asarray(value, dtype=np.float64)
+    return np.asarray(value, dtype=np.float64)
+
+
+def _probe_open_loop(
+    policy: Any,
+    preprocessor: Any,
+    postprocessor: Any,
+    dataset: Any,
+    device: str,
+    *,
+    n: int = 200,
+) -> dict[str, float]:
+    policy.eval()
+    if hasattr(policy, "reset"):
+        policy.reset()
+    preds: list[np.ndarray] = []
+    refs: list[np.ndarray] = []
+    with torch.no_grad():
+        for i in range(min(n, len(dataset))):
+            row = dataset[i]
+            batch = {
+                key: value
+                for key, value in row.items()
+                if isinstance(key, str)
+                and (key.startswith("observation.") or key.startswith("action"))
+            }
+            if preprocessor is not None:
+                batch = preprocessor(batch)
+            batch = _to_device(batch, device)
+            action = policy.select_action(batch)
+            if postprocessor is not None:
+                action = postprocessor(action)
+            pred_vec = _as_numpy(action).reshape(-1)
+            ref_raw = _as_numpy(row["action"]).reshape(-1)
+            if ref_raw.size != pred_vec.size:
+                ref_raw = ref_raw.reshape(-1, pred_vec.size)[0]
+            preds.append(pred_vec)
+            refs.append(ref_raw)
+    policy.train()
+    if hasattr(policy, "reset"):
+        policy.reset()
+    pred = np.stack(preds)
+    ref = np.stack(refs)
+    return {
+        "probe_l2": float(np.mean(np.linalg.norm(pred - ref, axis=1))),
+        "probe_std": float(pred.std()),
+        "probe_ref_std": float(ref.std()),
+    }
 
 
 def main() -> None:
@@ -86,19 +231,33 @@ def main() -> None:
 
     save_at = _save_steps()
     max_steps = max(save_at)
-    out_root = Path(os.environ.get("ACT_OUT", "/root/autodl-tmp/ckpts"))
+    out_root = Path(os.environ.get("ACT_OUT", "/root/autodl-tmp/ckpts/v2"))
     device = "cuda" if torch.cuda.is_available() else "cpu"
     repo_id = os.environ.get("ACT_REPO", "lerobot/aloha_static_coffee")
     base_ckpt = os.environ.get("ACT_BASE_CKPT", "gozdebaydogmus/act-aloha-static-coffee-test")
     base_rev = os.environ.get("ACT_BASE_REV", "646846823c8473712f689f59bdd03f798a688f6a")
-    batch_size = int(os.environ.get("ACT_BATCH", "2"))
-    workers = int(os.environ.get("ACT_WORKERS", "2"))
+    batch_size = int(os.environ.get("ACT_BATCH", "8"))
+    workers = int(os.environ.get("ACT_WORKERS", "4"))
+    # ~4000 samples in total: each worker keeps its own sequential buffer.
+    default_buf = "1000" if workers > 0 else "4000"
+    buffer_size = int(os.environ.get("ACT_BUFFER", default_buf))
     lr = float(os.environ.get("ACT_LR", "1e-5"))
     train_from = int(os.environ.get("ACT_EP_FROM", "10"))
     train_to = int(os.environ.get("ACT_EP_TO", "49"))
     episodes = list(range(train_from, train_to + 1))
 
-    print(f"[train] device={device} steps={max_steps} save={save_at} eps={train_from}-{train_to}")
+    print(
+        f"[train] device={device} steps={max_steps} save={save_at} "
+        f"eps={train_from}-{train_to} batch={batch_size} workers={workers} buffer={buffer_size}"
+    )
+    if workers > 0:
+        import torch.multiprocessing as mp
+
+        try:
+            mp.set_start_method("spawn", force=True)
+            print("[train] multiprocessing start_method=spawn", flush=True)
+        except RuntimeError as exc:
+            print(f"[train] spawn not set: {exc}", flush=True)
     _isolate_lerobot_imports()
     if _video_backend() != "torchcodec":
         _patch_video_decoder()
@@ -143,32 +302,47 @@ def main() -> None:
         kwargs.pop("video_backend", None)
         kwargs.pop("download_videos", None)
         dataset = LeRobotDataset(**kwargs)
-    print(f"[train] dataset n={len(dataset)} batch={batch_size} workers={workers}")
+    ranges = _episode_ranges(dataset, episodes)
+    print(f"[train] dataset n={len(dataset)} ranges={len(ranges)}")
+    meta_stats = getattr(getattr(dataset, "meta", None), "stats", None) or {}
+    action_stats = meta_stats.get("action")
+    if action_stats:
+        _align_action_stats(preprocessor, action_stats, device)
+        _align_action_stats(postprocessor, action_stats, device)
+        mean = np.asarray(action_stats.get("mean"))
+        print(f"[train] aligned action mean={mean.reshape(-1).round(4).tolist()}", flush=True)
 
-    # Sequential reads keep the mp4 decoder hot; full shuffle seeks every step.
-    shuffle = os.environ.get("ACT_SHUFFLE", "0") == "1"
+    probe_kwargs = dict(kwargs)
+    probe_kwargs["episodes"] = [0]
+    try:
+        probe_ds = LeRobotDataset(**probe_kwargs)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[train] probe dataset unavailable: {exc}")
+        probe_ds = None
+
+    print("[train] building dataloader", flush=True)
+    iterable = BufferedEpisodeIterable(
+        dataset, ranges, buffer_size=buffer_size, seed=0
+    )
     loader = DataLoader(
-        dataset,
+        iterable,
         batch_size=batch_size,
-        shuffle=shuffle,
         num_workers=workers,
         collate_fn=_collate,
-        pin_memory=device == "cuda",
-        drop_last=True,
+        pin_memory=False,
         persistent_workers=False,
-        prefetch_factor=2 if workers > 0 else None,
+        prefetch_factor=1 if workers > 0 else None,
+        worker_init_fn=_patch_worker_runtime if workers > 0 else None,
     )
     opt = torch.optim.AdamW(policy.parameters(), lr=lr)
+    print("[train] waiting for first batch (filling shuffle buffers)", flush=True)
     iterator = iter(loader)
     saved: list[int] = []
     t0 = time.time()
     for step in range(start_step + 1, max_steps + 1):
         try:
             batch = next(iterator)
-        except StopIteration:
-            iterator = iter(loader)
-            batch = next(iterator)
-        except Exception as exc:  # noqa: BLE001 — skip a corrupt video frame
+        except Exception as exc:  # noqa: BLE001
             print(f"[train] skip step {step}: {type(exc).__name__}: {exc}", flush=True)
             iterator = iter(loader)
             continue
@@ -186,6 +360,18 @@ def main() -> None:
                 f"elapsed={time.time() - t0:.0f}s {extra}",
                 flush=True,
             )
+        if probe_ds is not None and (step == 1 or step % 500 == 0 or step in save_at):
+            try:
+                stats = _probe_open_loop(
+                    policy, preprocessor, postprocessor, probe_ds, device
+                )
+                print(
+                    f"[train] probe step {step} l2={stats['probe_l2']:.4f} "
+                    f"pred_std={stats['probe_std']:.4f} ref_std={stats['probe_ref_std']:.4f}",
+                    flush=True,
+                )
+            except Exception as exc:  # noqa: BLE001
+                print(f"[train] probe failed: {type(exc).__name__}: {exc}", flush=True)
         if step in save_at:
             dest = out_root / f"act-coffee-{step}"
             dest.mkdir(parents=True, exist_ok=True)

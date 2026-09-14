@@ -79,30 +79,18 @@ def rule_mean_plus_3sigma(values: list[float]) -> dict[str, float]:
     }
 
 
-def predicted_envelope(
-    runs_root: Path,
+def recorded_envelope(
+    slice_root: Path,
     scenario_ids: list[str],
     *,
     pad: float = 0.10,
 ) -> tuple[list[float], list[float]]:
     blocks: list[np.ndarray] = []
     for sid in scenario_ids:
-        matches = []
-        for meta in Path(runs_root).glob("*/meta.json"):
-            try:
-                run = Run.load(meta.parent)
-            except Exception:  # noqa: BLE001
-                continue
-            if run.meta.scenario_id == sid:
-                matches.append(meta.parent)
-        if not matches:
-            continue
-        latest = max(matches, key=lambda path: path.stat().st_mtime)
-        values = Run.load(latest).output("action").get_column("value").to_list()
-        pred = np.asarray(values, dtype=np.float64)
-        blocks.append(pred)
+        recorded = Slice.load(Path(slice_root) / sid).recorded_action()
+        blocks.append(np.asarray(recorded.get_column("value").to_list(), dtype=np.float64))
     if not blocks:
-        raise FileNotFoundError(f"no predicted actions under {runs_root}")
+        raise FileNotFoundError(f"no recorded actions under {slice_root}")
     stacked = np.concatenate(blocks, axis=0)
     lo = stacked.min(axis=0)
     hi = stacked.max(axis=0)
@@ -110,10 +98,53 @@ def predicted_envelope(
     return (lo - pad * span).tolist(), (hi + pad * span).tolist()
 
 
+def predicted_envelope(
+    runs_root: Path,
+    scenario_ids: list[str],
+    *,
+    pad: float = 0.10,
+) -> tuple[list[float], list[float]]:
+    """Deprecated alias kept for call sites that still pass runs."""
+    del pad
+    raise RuntimeError("use recorded_envelope(slice_root, ids)")
+
+
+def lag_from_runs(
+    runs_root: Path,
+    scenario_ids: list[str],
+    *,
+    search_frames: int = 50,
+) -> dict[str, Any]:
+    from robogate.asserts.action_lag import estimate_lag
+    from robogate.eval import find_run
+
+    lags: dict[str, int] = {}
+    for sid in scenario_ids:
+        try:
+            run = Run.load(find_run(runs_root, sid))
+            pred = np.asarray(run.output("action").get_column("value").to_list(), dtype=np.float64)
+            rec = np.asarray(
+                run.output("action", recorded=True).get_column("value").to_list(),
+                dtype=np.float64,
+            )
+            lag, _, _ = estimate_lag(pred, rec, search_frames=search_frames)
+        except Exception:  # noqa: BLE001
+            continue
+        lags[sid] = int(lag)
+    abs_lags = [abs(v) for v in lags.values()]
+    return {
+        "by_scenario": lags,
+        "max_abs": max(abs_lags) if abs_lags else 0,
+        "max_lag_frames": (max(abs_lags) if abs_lags else 0) + 2,
+    }
+
+
 def thresholds_from_eval(
     parquet: Path,
     runs_root: Path,
     suite: Path,
+    *,
+    slice_root: Path = Path("slices"),
 ) -> dict[str, Any]:
     table = pl.read_parquet(parquet)
     items = load_suite(suite)
@@ -122,15 +153,19 @@ def thresholds_from_eval(
     delta = measured_by_type(table, "action_smoothness")
     l2_rule = rule_mean_plus_3sigma(list(l2.values()))
     delta_rule = rule_mean_plus_3sigma(list(delta.values()))
-    mins, maxs = predicted_envelope(runs_root, ids)
+    mins, maxs = recorded_envelope(slice_root, ids)
+    lag = lag_from_runs(runs_root, ids)
     return {
         "max_l2": max(l2_rule["mean_plus_3sigma"], 1e-6),
         "max_delta": max(delta_rule["mean_plus_3sigma"], 1e-6),
         "bounds_min": mins,
         "bounds_max": maxs,
+        "max_lag_frames": int(lag["max_lag_frames"]),
         "l2_rule": l2_rule,
         "delta_rule": delta_rule,
+        "lag": lag,
         "n_scenarios": len(ids),
+        "bounds_source": "recorded+10%",
     }
 
 
@@ -152,6 +187,8 @@ def write_suite_thresholds(
             f"# thresholds from eval_id={eval_id}\n"
             f"# max_l2=mean+3σ={thresholds['max_l2']}\n"
             f"# max_delta=mean+3σ={thresholds['max_delta']}\n"
+            f"# bounds={thresholds.get('bounds_source', 'recorded+10%')}\n"
+            f"# max_lag_frames={thresholds.get('max_lag_frames', 2)}\n"
         )
         body = yaml.safe_dump(
             updated.model_dump(mode="json", exclude_none=True),
@@ -174,5 +211,18 @@ def _apply_thresholds(scenario: Scenario, thresholds: dict[str, Any]) -> list[di
         elif item.type == "action_bounds":
             data["min"] = [float(v) for v in thresholds["bounds_min"]]
             data["max"] = [float(v) for v in thresholds["bounds_max"]]
+        elif item.type == "action_lag" and "max_lag_frames" in thresholds:
+            data["max_lag_frames"] = int(thresholds["max_lag_frames"])
         expected.append(data)
+    has_lag = any(item.get("type") == "action_lag" for item in expected)
+    if "max_lag_frames" in thresholds and not has_lag:
+        expected.append(
+            {
+                "type": "action_lag",
+                "topic": "action",
+                "reference": "recorded",
+                "max_lag_frames": int(thresholds["max_lag_frames"]),
+                "search_frames": 50,
+            }
+        )
     return expected

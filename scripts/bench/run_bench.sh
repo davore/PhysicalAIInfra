@@ -16,11 +16,13 @@ RUNS="${RUNS:-runs}"
 OUT="${OUT:-results}"
 SLICE="${SLICE:-slices}"
 DEVICE="${DEVICE:-cuda}"
-BASE_CKPT="${BASE_CKPT:-gozdebaydogmus/act-aloha-static-coffee-test}"
-BASE_REV="${BASE_REV:-646846823c8473712f689f59bdd03f798a688f6a}"
-T2K="${T2K:-/root/autodl-tmp/ckpts/act-coffee-2000}"
-T10K="${T10K:-/root/autodl-tmp/ckpts/act-coffee-10000}"
-T30K="${T30K:-/root/autodl-tmp/ckpts/act-coffee-30000}"
+PUBLISHED="${PUBLISHED:-gozdebaydogmus/act-aloha-static-coffee-test}"
+PUB_REV="${PUB_REV:-646846823c8473712f689f59bdd03f798a688f6a}"
+T2K="${T2K:-/root/autodl-tmp/ckpts/v2/act-coffee-2000}"
+T10K="${T10K:-/root/autodl-tmp/ckpts/v2/act-coffee-10000}"
+T30K="${T30K:-/root/autodl-tmp/ckpts/v2/act-coffee-30000}"
+BASE_CKPT="${BASE_CKPT:-${PUBLISHED}}"
+BASE_REV="${BASE_REV:-${PUB_REV}}"
 
 eval_one() {
   local id="$1"
@@ -30,30 +32,7 @@ eval_one() {
     --eval-id "${id}" "$@"
 }
 
-# Baseline B (replay). Thresholds may still be extract defaults.
-eval_one B --replay --device "${DEVICE}" --adapter lerobot \
-  --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}"
-
-python scripts/bench/write_thresholds.py "${SUITE}" --eval "${OUT}/B.parquet" \
-  --runs "${RUNS}" --eval-id B
-
-# Re-assert B with calibrated thresholds (no replay).
-eval_one B-calib --device "${DEVICE}" --adapter lerobot
-
-# False-alarm: same checkpoint replayed again.
-eval_one B-rerun --replay --device "${DEVICE}" --adapter lerobot \
-  --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}"
-
-# Known-worse input perturbations on B.
-eval_one B-drop-cam --replay --device "${DEVICE}" --adapter lerobot \
-  --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}" \
-  --perturb drop_camera=cam_high
-
-eval_one B-state-noise --replay --device "${DEVICE}" --adapter lerobot \
-  --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}" \
-  --perturb state_noise=0.05
-
-# Trained checkpoints (local dirs; revision cleared by eval).
+# Replay trained checkpoints first so tracking_judge can pick B' vs published B.
 if [[ -d "${T2K}" ]]; then
   eval_one T2k --replay --device "${DEVICE}" --adapter lerobot --checkpoint "${T2K}"
 fi
@@ -62,6 +41,68 @@ if [[ -d "${T10K}" ]]; then
 fi
 if [[ -d "${T30K}" ]]; then
   eval_one T30k --replay --device "${DEVICE}" --adapter lerobot --checkpoint "${T30K}"
+  python scripts/bench/tracking_judge.py "${SUITE}" --runs "${RUNS}" \
+    --version-contains "act-coffee-30000" | tee "${OUT}/tracking.json"
+  if python - "${OUT}/tracking.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+raise SystemExit(0 if json.loads(Path(sys.argv[1]).read_text())["ok"] else 1)
+PY
+  then
+    BASE_CKPT="${T30K}"
+    BASE_REV=""
+    echo "[bench] tracking ok; baseline B' = ${T30K}"
+  else
+    echo "[bench] T30k does not track; baseline stays published B"
+  fi
+fi
+
+# Baseline B (or B') replay. Thresholds may still be extract defaults.
+if [[ -n "${BASE_REV}" ]]; then
+  eval_one B --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}"
+else
+  eval_one B --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}"
+fi
+
+python scripts/bench/write_thresholds.py "${SUITE}" --eval "${OUT}/B.parquet" \
+  --runs "${RUNS}" --slices "${SLICE}" --eval-id B
+
+# Re-assert B with calibrated thresholds (no replay).
+eval_one B-calib --device "${DEVICE}" --adapter lerobot
+
+# False-alarm: same checkpoint replayed again.
+if [[ -n "${BASE_REV}" ]]; then
+  eval_one B-rerun --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}"
+else
+  eval_one B-rerun --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}"
+fi
+
+# Known-worse input perturbations on the chosen baseline.
+if [[ -n "${BASE_REV}" ]]; then
+  eval_one B-drop-cam --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}" \
+    --perturb drop_camera=cam_high
+  eval_one B-state-noise --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}" --revision "${BASE_REV}" \
+    --perturb state_noise=0.05
+else
+  eval_one B-drop-cam --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}" \
+    --perturb drop_camera=cam_high
+  eval_one B-state-noise --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${BASE_CKPT}" \
+    --perturb state_noise=0.05
+fi
+
+# Always report the published checkpoint if it is not the baseline.
+if [[ "${BASE_CKPT}" != "${PUBLISHED}" ]]; then
+  eval_one B-published --replay --device "${DEVICE}" --adapter lerobot \
+    --checkpoint "${PUBLISHED}" --revision "${PUB_REV}"
 fi
 
 echo "ROBOGATE_BENCH_EVAL_DONE"

@@ -123,6 +123,15 @@ def extract_lerobot(
         expected.append(
             {"type": "action_smoothness", "topic": "action", "max_delta": max_delta}
         )
+        expected.append(
+            {
+                "type": "action_lag",
+                "topic": "action",
+                "reference": "recorded",
+                "max_lag_frames": 2,
+                "search_frames": 50,
+            }
+        )
 
     source: dict[str, Any] = {
         "kind": "lerobot",

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from robogate.bench.calib import inter_demo_l2, rule_mean_plus_3sigma
+from robogate.bench.calib import inter_demo_l2, recorded_envelope, rule_mean_plus_3sigma
 from robogate.extract import extract_lerobot
 from tests.helpers import write_mini_lerobot_v3
 
@@ -30,3 +30,6 @@ def test_inter_demo_and_threshold_rule(tmp_path: Path) -> None:
     rule = rule_mean_plus_3sigma([0.2, 0.3, 0.4])
     assert rule["mean"] == 0.3
     assert rule["mean_plus_3sigma"] > rule["mean"]
+    lo, hi = recorded_envelope(tmp_path / "slices", ids)
+    assert len(lo) == 2
+    assert all(high > low for low, high in zip(lo, hi, strict=True))

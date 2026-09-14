@@ -11,18 +11,18 @@ export HF_LEROBOT_HOME="${HF_LEROBOT_HOME:-/root/autodl-tmp/hf/lerobot}"
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
 export PYTHONNOUSERSITE=1
 export ACT_SAVE_STEPS="${ACT_SAVE_STEPS:-2000,10000,30000}"
-export ACT_OUT="${ACT_OUT:-/root/autodl-tmp/ckpts}"
-export ACT_WORKERS="${ACT_WORKERS:-0}"
-export ACT_SHUFFLE="${ACT_SHUFFLE:-0}"
-export ACT_BATCH="${ACT_BATCH:-2}"
+export ACT_OUT="${ACT_OUT:-/root/autodl-tmp/ckpts/v2}"
+export ACT_WORKERS="${ACT_WORKERS:-4}"
+export ACT_BATCH="${ACT_BATCH:-8}"
+export ACT_BUFFER="${ACT_BUFFER:-64}"
+export ACT_SKIP_LEROBOT_TRAIN="${ACT_SKIP_LEROBOT_TRAIN:-1}"
 
 ID="$(date -u +%Y%m%dT%H%M%SZ)-train-$$"
 JOB="${ROOT}/jobs/${ID}"
 mkdir -p "${JOB}"
 ln -sfn "${JOB}" "${ROOT}/jobs/current"
 
-echo "[train] trying lerobot-train import"
-if python - <<'PY'
+if [[ "${ACT_SKIP_LEROBOT_TRAIN}" != "1" ]] && python - <<'PY'
 import sys
 try:
     import lerobot.scripts.train  # noqa: F401

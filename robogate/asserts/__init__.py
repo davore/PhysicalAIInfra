@@ -5,6 +5,7 @@ from __future__ import annotations
 from robogate.asserts import (  # noqa: F401
     action_bounds,
     action_deviation,
+    action_lag,
     action_smoothness,
     closed_loop,
     confidence_floor,

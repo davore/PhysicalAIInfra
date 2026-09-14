@@ -53,6 +53,7 @@ def test_mock_extract_replay_assert(tmp_path: Path) -> None:
     assert by_type["action_deviation"] == Status.PASS
     assert by_type["action_bounds"] == Status.PASS
     assert by_type["action_smoothness"] == Status.PASS
+    assert by_type["action_lag"] == Status.PASS
     assert by_type["latency"] == Status.PASS
     assert by_type["confidence_floor"] == Status.SKIPPED
     assert overall_ok(results)

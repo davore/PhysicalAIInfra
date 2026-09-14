@@ -96,6 +96,14 @@ class ActionSmoothness(_Strict):
     max_delta: float = Field(gt=0)
 
 
+class ActionLag(_Strict):
+    type: Literal["action_lag"]
+    topic: str
+    reference: Literal["recorded"] = "recorded"
+    max_lag_frames: int = Field(ge=0)
+    search_frames: int = Field(default=50, gt=0)
+
+
 class Latency(_Strict):
     type: Literal["latency"]
     topic: str
@@ -138,6 +146,7 @@ Expectation = Annotated[
     ActionDeviation
     | ActionBounds
     | ActionSmoothness
+    | ActionLag
     | Latency
     | ConfidenceFloor
     | GoalReached

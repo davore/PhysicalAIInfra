@@ -266,12 +266,14 @@ def diff(
     b: Path = typer.Argument(..., exists=True, readable=True),
     fail_on_regression: bool = typer.Option(False, "--fail-on-regression"),
     as_json: bool = typer.Option(False, "--json"),
+    runs_a: Path | None = typer.Option(None, "--runs-a"),
+    runs_b: Path | None = typer.Option(None, "--runs-b"),
 ) -> None:
     """Compare two eval parquets scene-by-scene."""
     from robogate.diff import diff_evals
 
     try:
-        payload = diff_evals(a, b)
+        payload = diff_evals(a, b, runs_a=runs_a, runs_b=runs_b)
     except (ValidationError, ValueError, OSError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(1) from exc
@@ -288,6 +290,8 @@ def diff(
                 f"  l2 {item['scenario_id']} {item['measured_a']:.6f}→{item['measured_b']:.6f} "
                 f"delta={item['delta']:.6f}"
             )
+        for item in payload.get("pred_shift") or []:
+            typer.echo(f"  shift {item['scenario_id']} {item['shift']}")
     if fail_on_regression and payload["n_regressions"]:
         raise typer.Exit(1)
 
@@ -298,12 +302,22 @@ def gate(
     baseline: Path = typer.Option(..., "--baseline", exists=True, readable=True),
     candidate: Path = typer.Option(..., "--candidate", exists=True, readable=True),
     as_json: bool = typer.Option(False, "--json"),
+    runs_baseline: Path | None = typer.Option(None, "--runs-baseline"),
+    runs_candidate: Path | None = typer.Option(None, "--runs-candidate"),
+    max_shift: int | None = typer.Option(None, "--max-shift"),
 ) -> None:
     """CI gate: baseline-pass must not fail; blocking must pass; hash must match."""
     from robogate.gate import run_gate
 
     try:
-        payload = run_gate(suite, baseline, candidate)
+        payload = run_gate(
+            suite,
+            baseline,
+            candidate,
+            runs_baseline=runs_baseline,
+            runs_candidate=runs_candidate,
+            max_shift=max_shift,
+        )
     except (ValidationError, ValueError, OSError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(1) from exc

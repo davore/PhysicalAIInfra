@@ -67,3 +67,33 @@ def test_diff_lists_regressions_fixes_and_l2(tmp_path: Path) -> None:
     deltas = {item["scenario_id"]: item["delta"] for item in payload["l2_deltas"]}
     assert abs(deltas["s1"] - 0.6) < 1e-9
     assert abs(deltas["s2"] - (-1.6)) < 1e-9
+
+
+def test_pred_shift_detects_lag(tmp_path: Path) -> None:
+    from robogate.bench.synth import synth_run
+    from robogate.diff import pred_shifts
+    from robogate.extract import extract_lerobot
+    from robogate.replay import build_adapter, run_replay
+    from robogate.scenario import load_scenario
+    from robogate.slice import Slice
+    from tests.helpers import write_mini_lerobot_v3
+
+    dataset = write_mini_lerobot_v3(tmp_path / "ds", n_frames=24)
+    scenario_path, _ = extract_lerobot(
+        str(dataset),
+        episode_index=0,
+        frame_from=0,
+        frame_to=24,
+        scenario_id="shift-mini",
+        scenario_out=tmp_path / "scenarios",
+        slice_root=tmp_path / "slices",
+        repo_id="local/mini",
+        entry="mock",
+    )
+    scenario = load_scenario(scenario_path)
+    slice_obj = Slice.load(tmp_path / "slices" / scenario.id)
+    base = run_replay(scenario, slice_obj, build_adapter("mock"), out_root=tmp_path / "runs-a")
+    lagged = synth_run(base, tmp_path / "runs-b" / base.name, kind="lag", value=10)
+    del lagged
+    shifts = pred_shifts(tmp_path / "runs-a", tmp_path / "runs-b", [scenario.id])
+    assert shifts[0]["shift"] == 10

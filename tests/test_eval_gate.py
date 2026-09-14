@@ -109,3 +109,49 @@ def test_eval_gate_known_answers(tmp_path: Path) -> None:
     assert cli.exit_code == 1
     compact = cli.output.replace(" ", "").lower()
     assert '"ok": false' in cli.output.lower() or '"ok":false' in compact
+
+
+def test_gate_max_shift_is_red(tmp_path: Path) -> None:
+    from robogate.bench.synth import synth_run
+    from robogate.replay import build_adapter, run_replay
+    from robogate.scenario import load_scenario
+    from robogate.slice import Slice
+
+    dataset = write_mini_lerobot_v3(tmp_path / "ds", n_frames=24)
+    suite = tmp_path / "suite"
+    slices = tmp_path / "slices"
+    scenario_path, _ = extract_lerobot(
+        str(dataset),
+        episode_index=0,
+        frame_from=0,
+        frame_to=24,
+        scenario_id="shift-ep0",
+        scenario_out=suite,
+        slice_root=slices,
+        repo_id="local/mini",
+        checkpoint="identity",
+        entry="mock",
+    )
+    raw = scenario_path.read_text(encoding="utf-8")
+    raw = raw.replace("max_lag_frames: 2", "max_lag_frames: 50")
+    raw = raw.replace("max_l2: 0.05", "max_l2: 10.0")
+    scenario_path.write_text(raw, encoding="utf-8")
+    scenario = load_scenario(scenario_path)
+    slice_obj = Slice.load(slices / scenario.id)
+    base_run = run_replay(scenario, slice_obj, build_adapter("mock"), out_root=tmp_path / "runs-a")
+    synth_run(base_run, tmp_path / "runs-b" / base_run.name, kind="lag", value=10)
+    out = tmp_path / "results"
+    baseline = run_eval(suite, runs_root=tmp_path / "runs-a", out_root=out, eval_id="a")
+    candidate = run_eval(suite, runs_root=tmp_path / "runs-b", out_root=out, eval_id="b")
+    green = run_gate(suite, baseline, candidate)
+    assert green["ok"] is True
+    red = run_gate(
+        suite,
+        baseline,
+        candidate,
+        runs_baseline=tmp_path / "runs-a",
+        runs_candidate=tmp_path / "runs-b",
+        max_shift=2,
+    )
+    assert red["ok"] is False
+    assert any("pred_shift" in reason for reason in red["reasons"])
