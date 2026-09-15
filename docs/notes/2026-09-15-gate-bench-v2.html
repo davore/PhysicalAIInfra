@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Robogate 门禁 benchmark v2 · 2026-09-15</title>
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --paper: #fffdf8;
+      --ink: #1c1915;
+      --muted: #5c564c;
+      --line: #e4ddd2;
+      --green: #1f7a4d;
+      --green-bg: #e6f4ec;
+      --red: #b42318;
+      --red-bg: #fdecea;
+      --amber: #8a5a00;
+      --amber-bg: #fff4d6;
+      --blue: #1d4e89;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font: 16px/1.55 "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Source Han Serif SC", serif;
+    }
+    header {
+      padding: 48px 24px 32px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+    }
+    .lede { color: var(--muted); max-width: 42em; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-top: 18px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .meta code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85em;
+    }
+    h2 {
+      margin: 48px 0 16px;
+      font-size: 1.35rem;
+    }
+    p { max-width: 42em; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin: 20px 0 8px;
+    }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 16px 14px;
+    }
+    .card .k { color: var(--muted); font-size: 0.85rem; }
+    .card .v { font-size: 1.55rem; font-weight: 650; margin: 6px 0 4px; }
+    .card .s { font-size: 0.88rem; color: var(--muted); }
+    .ok { color: var(--green); }
+    .bad { color: var(--red); }
+    .warn { color: var(--amber); }
+    .pill {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pill.ok { background: var(--green-bg); color: var(--green); }
+    .pill.bad { background: var(--red-bg); color: var(--red); }
+    .pill.warn { background: var(--amber-bg); color: var(--amber); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; background: #faf6ef; }
+    tr:last-child td { border-bottom: 0; }
+    .bars { display: grid; gap: 10px; margin: 16px 0 8px; }
+    .bar-row { display: grid; grid-template-columns: 120px 1fr 64px; gap: 10px; align-items: center; }
+    .bar-track { height: 12px; background: #efe8dc; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; background: var(--blue); }
+    .bar-fill.best { background: var(--green); }
+    .bar-fill.worst { background: var(--red); }
+    .note {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--muted);
+    }
+    ul.tight { padding-left: 1.2em; }
+    footer {
+      margin-top: 48px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    a { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <header>
+    <main>
+      <h1>Robogate 门禁 benchmark v2</h1>
+      <p class="lede">
+        第二轮：修 lag 盲区、改 bounds 来源、诊断发布 ACT 的归一化错位，并重训带 shuffle 的 ACT。
+        基线改为会跟踪的自训 T30k（B'）。不测能不能泡咖啡，只测工具会不会漏、会不会误报。
+      </p>
+      <div class="meta">
+        <span>2026-09-15</span>
+        <span>留出 ep0–9 · 训练 ep10–49</span>
+        <span>B' <code>ckpts/v2/act-coffee-30000</code></span>
+      </div>
+    </main>
+  </header>
+  <main>
+    <section>
+      <h2>四个指标</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="k">误报（重跑）</div>
+          <div class="v ok">0</div>
+          <div class="s">fold 一致；gate 红是 hash 被 --checkpoint 改写</div>
+        </article>
+        <article class="card">
+          <div class="k">检出</div>
+          <div class="v ok">lag-10 不再漏</div>
+          <div class="s">pred_shift 10/10 恰为 10；error 类 100%</div>
+        </article>
+        <article class="card">
+          <div class="k">排序一致性</div>
+          <div class="v warn">7 / 10</div>
+          <div class="s">T2k &gt; T10k &gt; T30k 的 L2 步数序</div>
+        </article>
+        <article class="card">
+          <div class="k">阈值覆盖</div>
+          <div class="v warn">7 / 10</div>
+          <div class="s">示教包络 +10% 对 B' 略紧（ep3/6/7）</div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>诊断：发布 B 的空间错了</h2>
+      <p>发布 checkpoint 的 action 反归一化统计几乎等于 <code>observation.state</code>，不是当前数据集的 <code>action</code>。开环偏移是归一化空间错了，不是观测没进模型。</p>
+      <table>
+        <thead>
+          <tr><th>来源</th><th>dim1 mean</th><th>全维 mean |Δ| vs unnorm</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>B unnormalizer action</td><td>0.480</td><td>0</td></tr>
+          <tr><td>数据集 action</td><td>−0.313</td><td><strong>0.327</strong></td></tr>
+          <tr><td>数据集 observation.state</td><td>0.507</td><td><strong>0.015</strong></td></tr>
+        </tbody>
+      </table>
+      <p>交叉回放 ep0 vs ep1：mean abs diff = 0.0236，max = 0.177。示教包络 + 10% 下，发布 B <span class="pill bad">10/10 红</span>（dim1 全出界）。</p>
+    </section>
+
+    <section>
+      <h2>重训与跟踪判定</h2>
+      <p>
+        episode 乱序 + 集内顺序，4 worker × buffer 64，batch=8，lr=1e-5。
+        训练前把 processor 的 action mean/std 改成数据集统计，否则还会解到 state 空间。
+      </p>
+      <table>
+        <thead><tr><th>步数</th><th>loss</th><th>墙钟</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>104.74</td><td>6s</td></tr>
+          <tr><td>2k</td><td>1.68</td><td>7 min</td></tr>
+          <tr><td>10k</td><td>0.175</td><td>44 min</td></tr>
+          <tr><td>30k</td><td>0.061</td><td>143 min</td></tr>
+        </tbody>
+      </table>
+      <p>T30k 跟踪判定三项全过，成为 B'：</p>
+      <table>
+        <thead><tr><th>条件</th><th>值</th><th>门槛</th><th>结果</th></tr></thead>
+        <tbody>
+          <tr><td>跨集 frame0 std</td><td>0.609</td><td>&gt; 0.01</td><td><span class="pill ok">过</span></td></tr>
+          <tr><td>per-dim corr 中位数</td><td>0.902</td><td>&gt; 0.5</td><td><span class="pill ok">过</span></td></tr>
+          <tr><td>10 集 mean L2</td><td>0.584</td><td>&lt; 1.836（示教间 ×2）</td><td><span class="pill ok">过</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>开环 L2</h2>
+      <div class="bars">
+        <div class="bar-row"><span>示教对示教</span><div class="bar-track"><div class="bar-fill best" style="width:40%"></div></div><span>0.918</span></div>
+        <div class="bar-row"><span>T2k</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span>0.759</span></div>
+        <div class="bar-row"><span>T10k</span><div class="bar-track"><div class="bar-fill" style="width:26%"></div></div><span>0.600</span></div>
+        <div class="bar-row"><span>T30k = B'</span><div class="bar-track"><div class="bar-fill best" style="width:26%"></div></div><span>0.584</span></div>
+        <div class="bar-row"><span>发布 B</span><div class="bar-track"><div class="bar-fill worst" style="width:100%"></div></div><span>2.287</span></div>
+      </div>
+      <p class="note">步数序 7/10。未同序的 3 集 L2 差很小，不推翻「更长训练更好」。</p>
+    </section>
+
+    <section>
+      <h2>检出</h2>
+      <table>
+        <thead><tr><th>候选</th><th>gate</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>action_bias / action_noise</td><td><span class="pill bad">红 10/10</span></td><td>与第一轮相同</td></tr>
+          <tr><td>action_lag=10（断言）</td><td><span class="pill warn">6/10 红</span></td><td>max_lag_frames=14，k=10 本身不够红</td></tr>
+          <tr><td>action_lag=10（pred_shift）</td><td><span class="pill bad">红 10/10，shift=10</span></td><td>不依赖是否跟示教</td></tr>
+          <tr><td>缺 recorded / 错维 / 错 id / 错 hash</td><td><span class="pill bad">红 10/10 error</span></td><td>fail-closed</td></tr>
+          <tr><td>发布 B vs 示教包络</td><td><span class="pill bad">红 10/10</span></td><td>归一化空间错位</td></tr>
+          <tr><td>B' + drop_camera=cam_high</td><td><span class="pill bad">红 10/10</span></td><td>L2 0.58 → 0.76</td></tr>
+          <tr><td>B' + state_noise=0.05</td><td><span class="pill warn">与 B-calib 同折</span></td><td>L2 不变；只报告</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>标定</h2>
+      <ul class="tight">
+        <li><code>max_l2 = mean+3σ = 1.442</code></li>
+        <li><code>max_delta = 1.448</code></li>
+        <li><code>action_bounds</code> = 10 集示教包络 + 10%</li>
+        <li><code>max_lag_frames = 14</code>（B' 在 10 集上 |k| 的 max + 2）</li>
+        <li>写回 <code>scenarios/real/aloha-static-coffee-ep{0-9}.yaml</code></li>
+      </ul>
+      <p>覆盖 7/10 是因为 B' 在 ep3 / ep6 / ep7 略出示教包络（出界份额 3.4% / 2.9% / 0.6%）。L2、smoothness、action_lag 均过。</p>
+    </section>
+
+    <footer>
+      源 markdown：<a href="./2026-09-15-gate-bench-v2.md">2026-09-15-gate-bench-v2.md</a>
+      · 诊断 JSON：<a href="./2026-09-15-diagnose-norm.json">2026-09-15-diagnose-norm.json</a>
+    </footer>
+  </main>
+</body>
+</html>

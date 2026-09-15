@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robogate"
+version = "0.1.0"
+description = "Robot CI: turn a field failure into a permanent regression test that blocks the release."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "davore" }]
+dependencies = [
+    "typer>=0.12",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "numpy>=1.26",
+    "polars>=1.0",
+    "pyarrow>=16.0",
+    "huggingface_hub>=0.24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+lerobot = ["lerobot>=0.4", "torchcodec"]
+mcap = ["mcap", "mcap-ros2-support", "rosbags"]
+report = ["jinja2>=3.1"]
+
+[project.scripts]
+robogate = "robogate.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["robogate*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

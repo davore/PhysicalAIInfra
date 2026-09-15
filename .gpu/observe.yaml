@@ -1,0 +1,64 @@
+# 情况板只读远端。本文件让 GPU 管家认出 PhysicalAIInfra / robogate 的远端任务，不往 8765 POST。
+# 字段说明见 SSHBridge/examples/observe.yaml；任务约定见 PLAN.md 第 7 节。
+#
+# 叠加顺序（后者覆盖同名字段，列表是并集）：
+#   1. 包装内置 generic（只认 wrap.sh + jobs/）
+#   2. 本机 ~/.config/gpu-bridge/recipes/*.yaml
+#   3. 当前仓库 .gpu/observe.yaml（本文件）
+name: robogate
+match:
+  processes:
+    - robogate
+    - wrap.sh
+    - eval_remote.sh
+    - sim_remote.sh
+    - isaaclab
+  job_roots:
+    - /root/work/PhysicalAIInfra
+    - /root/PhysicalAIInfra
+    - /root/work
+logs:
+  - path: /root/work/PhysicalAIInfra/jobs/current/replay.log
+    title: "策略回放推理"
+    done: ROBOGATE_REPLAY_DONE
+    cmd: "bash scripts/remote/wrap.sh replay"
+    module: replay
+    cover: ["wrap.sh replay", "robogate replay"]
+  - path: /root/work/PhysicalAIInfra/jobs/current/eval.log
+    title: "批量回归评测"
+    done: ROBOGATE_EVAL_DONE
+    cmd: "bash scripts/remote/wrap.sh eval"
+    module: eval
+    cover: ["wrap.sh eval", "robogate eval"]
+    except: ["--sim"]
+  - path: /root/work/PhysicalAIInfra/jobs/current/sim.log
+    title: "Isaac Lab 仿真评测"
+    done: ROBOGATE_SIM_DONE
+    cmd: "bash scripts/remote/wrap.sh sim"
+    module: sim
+    switches: ["sim"]
+    cover: ["wrap.sh sim", "robogate eval --sim", "isaaclab"]
+  - path: /root/work/PhysicalAIInfra/jobs/current/cluster.log
+    title: "失败片段聚类"
+    done: ROBOGATE_CLUSTER_DONE
+    cmd: "bash scripts/remote/wrap.sh cluster"
+    module: cluster
+    cover: ["wrap.sh cluster", "robogate cluster"]
+argv:
+  flags: ["--suite", "--target", "--baseline", "--model", "--checkpoint", "--device", "--num-envs", "--episodes", "--seeds"]
+  switches: ["--sim", "--headless", "--strict", "--no-cache", "--diff-only"]
+progress: '\[(?P<tag>[^\]]+)\]\s+scenario\s+(?P<epoch>\d+)/(?P<epochs>\d+)(?:.*?pass=(?P<val>[\d.]+)%)?'
+labels:
+  modules:
+    replay: 学习型策略回放推理
+    eval: 批量回归评测
+    sim: Isaac Lab 仿真评测
+    cluster: 失败片段 embedding 聚类
+    extract: MCAP 切片生成 scenario
+    gate: 发布门禁判定
+  switches:
+    sim: 在仿真里做闭环统计
+    headless: 无渲染运行
+    strict: 任一断言失败即整体失败
+    no-cache: 不复用已缓存的切片
+    diff-only: 只输出与基线的差异

@@ -1,0 +1,82 @@
+# thresholds from eval_id=Bp
+# max_l2=mean+3σ=2.2324058120691306
+# max_delta=mean+3σ=1.4456728495040385
+# bounds=recorded+15%
+# max_lag_frames=14
+schema_version: 0
+id: aloha-static-coffee-ep4
+blocking: true
+source:
+  kind: lerobot
+  dataset: lerobot/aloha_static_coffee
+  episode_index: 4
+  frame_from: 0
+  frame_to: 1100
+  revision: b144896feb1f37398a862927b22cd3abdf005a6b
+tags:
+- lerobot
+- open-loop
+inputs:
+- observation.images.cam_high
+- observation.images.cam_left_wrist
+- observation.images.cam_low
+- observation.images.cam_right_wrist
+- observation.state
+- observation.effort
+target:
+  adapter: python-policy
+  entry: lerobot
+  checkpoint: gozdebaydogmus/act-aloha-static-coffee-test
+  revision: 646846823c8473712f689f59bdd03f798a688f6a
+expected:
+- type: action_deviation
+  topic: action
+  reference: recorded
+  max_l2: 2.2324058120691306
+  metric: l2
+- type: latency
+  topic: /policy/action
+  p95_ms: 80.0
+- type: confidence_floor
+  topic: /policy/action
+  min_confidence: 0.3
+- type: action_bounds
+  topic: action
+  min:
+  - -0.36554764285683633
+  - -1.1333050392568111
+  - 0.05522331446409226
+  - -0.7199739143252373
+  - -1.1576186418533325
+  - -1.5981779873371125
+  - -0.04701780192553996
+  - -0.8152341187000275
+  - -1.1488749504089355
+  - 0.13583399653434755
+  - -1.1675128296017647
+  - -1.2271846547722816
+  - -0.15562235318357123
+  - -0.07383345933631062
+  max:
+  - 0.1968097396194935
+  - 0.4061981253325939
+  - 1.3314953461289405
+  - 1.5314497575163841
+  - 0.9382593631744385
+  - 1.7899255335330964
+  - 0.9636321779340505
+  - 0.34736996293067934
+  - 0.5122729063034057
+  - 1.4978555262088775
+  - 0.6152796998620034
+  - 0.6074564173817635
+  - 1.1665157066774554
+  - 0.6736054153181612
+- type: action_smoothness
+  topic: action
+  max_delta: 1.4456728495040385
+- type: action_lag
+  topic: action
+  reference: recorded
+  max_lag_frames: 14
+  search_frames: 50
