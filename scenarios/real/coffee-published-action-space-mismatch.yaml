@@ -1,20 +1,24 @@
+# 2026-09-15 发现发布权重把 action 解到 observation.state 空间
+# window: ep0 frames 413-663 (5.0s @ 50fps), max published-B mean L2
 # thresholds from eval_id=Bp
 # max_l2=mean+3σ=2.2324058120691306
 # max_delta=mean+3σ=1.4456728495040385
 # bounds=recorded+15%
 # max_lag_frames=14
 schema_version: 0
-id: aloha-static-coffee-ep8
+id: coffee-published-action-space-mismatch
 blocking: true
 source:
   kind: lerobot
   dataset: lerobot/aloha_static_coffee
-  episode_index: 8
-  frame_from: 0
-  frame_to: 1100
+  episode_index: 0
+  frame_from: 413
+  frame_to: 663
   revision: b144896feb1f37398a862927b22cd3abdf005a6b
 tags:
-- lerobot
+- grasp
+- incident:norm-space
+- model:published-b
 - open-loop
 inputs:
 - observation.images.cam_high

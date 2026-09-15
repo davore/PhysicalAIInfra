@@ -21,6 +21,16 @@
 
 其他：本机用 `conda create -n robogate python=3.11`；M1 先打通 LeRobot，MCAP `extract` 挪到第 7–8 周与 `ros2-node` 一起；`gate` = 基线通过的 scenario 不得失败 + `blocking: true` 必须通过。
 
+### 0.2 → 第 2 周实际
+
+引擎在第 1 周已到 M1 出口（`extract` / `replay` / `eval` / `diff` / `gate`）。第 2 周不再往 MCAP / Isaac / 再训模型走，改为：
+
+1. 用公开 coffee 数据切一条事故形态 scenario（`coffee-published-action-space-mismatch`，ep0 413–663）。
+2. `action_bounds` 改为示教包络 +15%，让冻结的 B' 在 suite 上 11/11 过。
+3. `fixtures/gate/` + GitHub Action：绿候选必须过，发布 B 必须红。本仓库的合并被门禁卡住，即「测试卡住发布」。
+
+MCAP extract、`ros2-node`、Isaac、HTML 报告、design partner 仍按 M2+ 延后。`train_act.py` 退出主路径。
+
 ## 1. 目标客户与核心用例
 
 ### ICP（前 12 个月只服务这一类）

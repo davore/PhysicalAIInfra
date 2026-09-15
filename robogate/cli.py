@@ -187,8 +187,10 @@ def replay(
     from robogate.slice import Slice
 
     try:
+        disk = load_scenario(scenario)
+        digest = content_hash(disk)
         loaded = _override_target(
-            load_scenario(scenario),
+            disk,
             checkpoint=checkpoint,
             revision=revision,
         )
@@ -203,6 +205,7 @@ def replay(
             out_root=out,
             device=device,
             perturbations=perturb or None,
+            scenario_hash=digest,
         )
     except (ValidationError, ValueError, OSError, RuntimeError, ImportError, KeyError) as exc:
         typer.echo(f"error: {exc}", err=True)
@@ -231,6 +234,9 @@ def eval(  # noqa: A001
     perturb: list[str] = typer.Option([], "--perturb"),
     noise: float = typer.Option(0.0, "--noise"),
     eval_id: str | None = typer.Option(None, "--eval-id"),
+    version_contains: str | None = typer.Option(
+        None, "--version-contains", help="Pick existing runs whose target_version contains this."
+    ),
 ) -> None:
     """Run a suite, write results/<eval_id>.parquet + .json."""
     from robogate.eval import run_eval, summarize_eval
@@ -249,6 +255,7 @@ def eval(  # noqa: A001
             perturbations=perturb or None,
             noise=noise,
             eval_id=eval_id,
+            version_contains=version_contains,
         )
     except (ValidationError, ValueError, OSError, RuntimeError) as exc:
         typer.echo(f"error: {exc}", err=True)

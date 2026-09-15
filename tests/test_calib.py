@@ -33,3 +33,6 @@ def test_inter_demo_and_threshold_rule(tmp_path: Path) -> None:
     lo, hi = recorded_envelope(tmp_path / "slices", ids)
     assert len(lo) == 2
     assert all(high > low for low, high in zip(lo, hi, strict=True))
+    lo_wide, hi_wide = recorded_envelope(tmp_path / "slices", ids, pad=0.25)
+    assert all(wide <= tight for wide, tight in zip(lo_wide, lo, strict=True))
+    assert all(wide >= tight for wide, tight in zip(hi_wide, hi, strict=True))

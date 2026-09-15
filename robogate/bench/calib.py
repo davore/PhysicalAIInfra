@@ -114,6 +114,7 @@ def lag_from_runs(
     scenario_ids: list[str],
     *,
     search_frames: int = 50,
+    version_contains: str | None = None,
 ) -> dict[str, Any]:
     from robogate.asserts.action_lag import estimate_lag
     from robogate.eval import find_run
@@ -121,7 +122,14 @@ def lag_from_runs(
     lags: dict[str, int] = {}
     for sid in scenario_ids:
         try:
-            run = Run.load(find_run(runs_root, sid))
+            run = Run.load(
+                find_run(
+                    runs_root,
+                    sid,
+                    version_contains=version_contains,
+                    unperturbed=True,
+                )
+            )
             pred = np.asarray(run.output("action").get_column("value").to_list(), dtype=np.float64)
             rec = np.asarray(
                 run.output("action", recorded=True).get_column("value").to_list(),
@@ -145,6 +153,8 @@ def thresholds_from_eval(
     suite: Path,
     *,
     slice_root: Path = Path("slices"),
+    bounds_pad: float = 0.10,
+    version_contains: str | None = None,
 ) -> dict[str, Any]:
     table = pl.read_parquet(parquet)
     items = load_suite(suite)
@@ -153,8 +163,9 @@ def thresholds_from_eval(
     delta = measured_by_type(table, "action_smoothness")
     l2_rule = rule_mean_plus_3sigma(list(l2.values()))
     delta_rule = rule_mean_plus_3sigma(list(delta.values()))
-    mins, maxs = recorded_envelope(slice_root, ids)
-    lag = lag_from_runs(runs_root, ids)
+    mins, maxs = recorded_envelope(slice_root, ids, pad=bounds_pad)
+    lag = lag_from_runs(runs_root, ids, version_contains=version_contains)
+    pct = int(round(bounds_pad * 100))
     return {
         "max_l2": max(l2_rule["mean_plus_3sigma"], 1e-6),
         "max_delta": max(delta_rule["mean_plus_3sigma"], 1e-6),
@@ -165,7 +176,8 @@ def thresholds_from_eval(
         "delta_rule": delta_rule,
         "lag": lag,
         "n_scenarios": len(ids),
-        "bounds_source": "recorded+10%",
+        "bounds_source": f"recorded+{pct}%",
+        "bounds_pad": bounds_pad,
     }
 
 

@@ -29,14 +29,15 @@ def run_eval(
     perturbations: list[str] | None = None,
     noise: float = 0.0,
     eval_id: str | None = None,
+    version_contains: str | None = None,
 ) -> Path:
     items = load_suite(suite)
     rows: list[dict[str, Any]] = []
     n = len(items)
     passed = 0
     for i, (path, scenario) in enumerate(items, start=1):
-        scenario = _override_target(scenario, checkpoint=checkpoint, revision=revision)
         digest = content_hash(scenario)
+        scenario = _override_target(scenario, checkpoint=checkpoint, revision=revision)
         try:
             run = _resolve_run(
                 scenario,
@@ -47,6 +48,8 @@ def run_eval(
                 adapter=adapter,
                 perturbations=perturbations,
                 noise=noise,
+                scenario_hash=digest,
+                version_contains=version_contains,
             )
             if run.meta.scenario_id != scenario.id:
                 raise ValueError(
@@ -161,8 +164,6 @@ def find_run(
             continue
         if run.meta.scenario_id != scenario_id:
             continue
-        if unperturbed and run.meta.perturbations:
-            continue
         version = run.meta.target_version or ""
         if version_contains and version_contains not in version:
             continue
@@ -170,6 +171,10 @@ def find_run(
     if not matches:
         extra = f" matching {version_contains}" if version_contains else ""
         raise FileNotFoundError(f"no run for scenario {scenario_id}{extra} under {root}")
+    if unperturbed:
+        clean = [path for path in matches if not Run.load(path).meta.perturbations]
+        if clean:
+            matches = clean
     return max(matches, key=lambda path: path.stat().st_mtime)
 
 
@@ -183,6 +188,8 @@ def _resolve_run(
     adapter: str,
     perturbations: list[str] | None,
     noise: float,
+    scenario_hash: str | None = None,
+    version_contains: str | None = None,
 ) -> Run:
     if replay:
         from robogate.replay import adapter_entry, build_adapter, run_replay
@@ -198,9 +205,17 @@ def _resolve_run(
             out_root=runs_root,
             device=device,
             perturbations=perturbations,
+            scenario_hash=scenario_hash,
         )
         return Run.load(dest)
-    return Run.load(find_run(runs_root, scenario.id))
+    return Run.load(
+        find_run(
+            runs_root,
+            scenario.id,
+            version_contains=version_contains,
+            unperturbed=True,
+        )
+    )
 
 
 def _override_target(

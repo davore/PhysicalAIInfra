@@ -10,6 +10,7 @@ from robogate.cli import app
 from robogate.eval import fold_eval, run_eval
 from robogate.extract import extract_lerobot
 from robogate.gate import run_gate
+from robogate.run import Run
 from tests.helpers import write_mini_lerobot_v3
 
 runner = CliRunner()
@@ -155,3 +156,81 @@ def test_gate_max_shift_is_red(tmp_path: Path) -> None:
     )
     assert red["ok"] is False
     assert any("pred_shift" in reason for reason in red["reasons"])
+
+
+def test_eval_checkpoint_override_keeps_disk_hash(tmp_path: Path) -> None:
+    from robogate.scenario import content_hash, load_scenario
+
+    suite, slices, runs = _suite(tmp_path)
+    disk = content_hash(load_scenario(suite / "mini-ep0.yaml"))
+    dest = run_eval(
+        suite,
+        runs_root=runs,
+        out_root=tmp_path / "results",
+        replay=True,
+        slice_root=slices,
+        adapter="mock",
+        checkpoint="other-ckpt",
+        eval_id="override",
+    )
+    table = pl.read_parquet(dest)
+    hashes = set(table.get_column("scenario_hash").to_list())
+    assert hashes == {
+        content_hash(load_scenario(suite / "mini-ep0.yaml")),
+        content_hash(load_scenario(suite / "mini-ep1.yaml")),
+        content_hash(load_scenario(suite / "mini-ep2.yaml")),
+    }
+    assert disk in hashes
+    versions = set(table.get_column("target_version").to_list())
+    assert "other-ckpt" in versions
+
+
+def test_eval_version_contains_picks_matching_run(tmp_path: Path) -> None:
+    from robogate.eval import find_run
+    from robogate.replay import build_adapter, run_replay
+    from robogate.scenario import load_scenario
+    from robogate.slice import Slice
+
+    suite, slices, _ = _suite(tmp_path)
+    scenario = load_scenario(suite / "mini-ep0.yaml")
+    slice_obj = Slice.load(slices / scenario.id)
+    runs = tmp_path / "mixed-runs"
+    run_replay(
+        scenario.model_copy(
+            update={"target": scenario.target.model_copy(update={"checkpoint": "good-ckpt"})}
+        ),
+        slice_obj,
+        build_adapter("mock"),
+        out_root=runs,
+        scenario_hash="sha256:disk",
+    )
+    run_replay(
+        scenario.model_copy(
+            update={"target": scenario.target.model_copy(update={"checkpoint": "bad-ckpt"})}
+        ),
+        slice_obj,
+        build_adapter("mock", perturbations=["action_bias=0.5"]),
+        out_root=runs,
+        perturbations=["action_bias=0.5"],
+        scenario_hash="sha256:disk",
+    )
+    picked = find_run(runs, "mini-ep0", version_contains="good-ckpt")
+    version = Run.load(picked).meta.target_version or ""
+    assert "good-ckpt" in version
+    dest = run_eval(
+        suite / "mini-ep0.yaml",
+        runs_root=runs,
+        out_root=tmp_path / "results",
+        eval_id="good",
+        version_contains="good-ckpt",
+    )
+    fold = fold_eval(pl.read_parquet(dest))
+    assert fold["mini-ep0"] == "pass"
+    dest_bad = run_eval(
+        suite / "mini-ep0.yaml",
+        runs_root=runs,
+        out_root=tmp_path / "results",
+        eval_id="bad",
+        version_contains="bad-ckpt",
+    )
+    assert fold_eval(pl.read_parquet(dest_bad))["mini-ep0"] == "fail"

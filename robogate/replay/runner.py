@@ -24,6 +24,7 @@ def run_replay(
     device: str = "cpu",
     host: str | None = None,
     perturbations: list[str] | None = None,
+    scenario_hash: str | None = None,
 ) -> Path:
     adapter.load(scenario.target, slice_, device=device)
     adapter.reset()
@@ -58,7 +59,7 @@ def run_replay(
         dest,
         RunMeta(
             scenario_id=scenario.id,
-            scenario_hash=content_hash(scenario),
+            scenario_hash=scenario_hash or content_hash(scenario),
             adapter=scenario.target.adapter,
             mode=RunMode.OPEN_LOOP,
             target_version=adapter.info.target_version,

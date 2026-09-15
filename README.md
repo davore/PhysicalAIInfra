@@ -2,9 +2,11 @@
 
 **把一次现场失败变成一条永久的回归测试，让测试卡住发布。**
 
+[![gate](https://github.com/davore/PhysicalAIInfra/actions/workflows/gate.yml/badge.svg)](https://github.com/davore/PhysicalAIInfra/actions/workflows/gate.yml)
+
 Robot CI：Incident → Scenario → Replay → Assert → Report → Gate。不做可视化、不做采集、不做硬件。
 
-已落地：`scenario` schema v0、Run 目录、`validate` / `schema` / `assert` / `extract`（LeRobot v3）/ `replay`（mock 或 lerobot ACT）。`eval` / `diff` / `gate` 尚未实现。
+CLI 已落地：`validate` / `schema` / `extract`（LeRobot v3）/ `replay` / `assert` / `eval` / `diff` / `gate`。
 
 ## 安装
 
@@ -16,47 +18,55 @@ conda activate robogate
 pip install -e ".[dev]"
 ```
 
-真实 ACT 回放另装可选 extra（通常在远端 GPU）。RTX 5090 必须先装 torch cu128，再 `pip install --no-deps lerobot`；不要直接 `pip install -e ".[lerobot]"`，否则会把 torch 降到不支持 sm_120 的版本。`scripts/remote/setup_env.sh` 按这个顺序装。
+真实 ACT 回放另装可选 extra（通常在远端 GPU）。RTX 5090 必须先装 torch cu128，再 `pip install --no-deps lerobot`；不要直接 `pip install -e ".[lerobot]"`。`scripts/remote/setup_env.sh` 按这个顺序装。远端 Hugging Face 走 `HF_ENDPOINT=https://hf-mirror.com`。
 
-远端访问 Hugging Face 走 IPv4 镜像（`HF_ENDPOINT=https://hf-mirror.com`），`wrap.sh` 已默认设置。
+## Incident → Gate
 
-## 用法
+用公开数据把一次失败冻成测试，再用门禁拦住坏权重。
 
-本机切一份公开真机数据，并校验 scenario：
+**1. 切事故窗**（不必等自家 Foxglove；这里是 coffee 示教上发布权重解错空间的 5 秒）：
 
 ```bash
 robogate extract lerobot lerobot/aloha_static_coffee \
-  --episode 0 --from 0 --to 1100 \
-  --id aloha-static-coffee-ep0 \
+  --episode 0 --from 413 --to 663 \
+  --id coffee-published-action-space-mismatch \
   --out scenarios/real --slice-dir slices \
   --revision b144896feb1f37398a862927b22cd3abdf005a6b \
   --checkpoint gozdebaydogmus/act-aloha-static-coffee-test \
   --target-revision 646846823c8473712f689f59bdd03f798a688f6a
-robogate validate scenarios/real/aloha-static-coffee-ep0.yaml
-robogate schema
+robogate validate scenarios/real/coffee-published-action-space-mismatch.yaml
 ```
 
-本机用 mock 适配器验证流水线（不需要 GPU / lerobot）：
+**2. 回放**（本机 mock，或不重放、直接用已提交的 fixture）：
 
 ```bash
-robogate replay scenarios/real/aloha-static-coffee-ep0.yaml --adapter mock --slice slices/aloha-static-coffee-ep0
-robogate assert scenarios/real/aloha-static-coffee-ep0.yaml runs/<run-id>
+robogate replay scenarios/real/coffee-published-action-space-mismatch.yaml \
+  --adapter mock --slice slices/coffee-published-action-space-mismatch
+robogate eval scenarios/real --runs runs --eval-id candidate
 ```
 
-远端 GPU 跑真实 ACT（RTX 5090 需要 torch cu128）：
+**3. 门禁**（基线绿不得变红；`blocking` 必须过）：
+
+```bash
+robogate gate scenarios/real \
+  --baseline fixtures/gate/baseline.parquet \
+  --candidate fixtures/gate/candidate.parquet
+```
+
+把 `fixtures/gate/known-bad/published-b.parquet` 当成 candidate 必须红。GitHub Action 在每个 PR 上跑这两次判定。
+
+`assert` 要求 `run.meta.scenario_id` 与 scenario `id` 一致。缺列或维度不对是 `error`（失败）。适配器没记的 latency / confidence，以及开环 run 上的闭环断言，标 `skipped`，不算失败。
+
+## 远端 GPU 回放
 
 ```bash
 bash scripts/remote/sync.sh push
-ssh microbo-gpu 'bash /root/work/PhysicalAIInfra/scripts/remote/setup_env.sh'
 ssh microbo-gpu 'bash /root/work/PhysicalAIInfra/scripts/remote/wrap.sh replay \
-  scenarios/real/aloha-static-coffee-ep0.yaml --device cuda --slice slices/aloha-static-coffee-ep0'
+  scenarios/real/coffee-published-action-space-mismatch.yaml --device cuda \
+  --slice slices/coffee-published-action-space-mismatch'
 bash scripts/remote/sync.sh pull runs/
-robogate assert scenarios/real/aloha-static-coffee-ep0.yaml runs/<run-id>
+robogate eval scenarios/real --runs runs --version-contains act-coffee-30000 --eval-id Bp
 ```
-
-`assert` 要求 `run.meta.scenario_id` 与 scenario `id` 一致。适配器没记的 latency / confidence 会标 `skipped`，不算失败。缺 `value` 列或维度对不上是 `error`，算失败。
-
-开环 run 遇到闭环断言（抓取成功、无碰撞等）也会标为 `skipped`。
 
 ## 开发
 
@@ -65,4 +75,8 @@ conda activate robogate
 pytest
 ```
 
-计划见 [PLAN.md](PLAN.md)。真机卡点见 [docs/notes/2026-09-13-real-data-blockers.md](docs/notes/2026-09-13-real-data-blockers.md)。
+计划见 [PLAN.md](PLAN.md)。首个门禁记录见 [docs/notes/2026-09-16-first-gate.md](docs/notes/2026-09-16-first-gate.md)。
+
+### Bench 附录
+
+`scripts/remote/train_act.py` 只为门禁 bench 冻过一个会跟踪的基线 B'，不再重训。已知答案测试见 `docs/notes/2026-09-15-gate-bench-v2.md`。
