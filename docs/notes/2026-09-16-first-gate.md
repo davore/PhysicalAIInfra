@@ -37,4 +37,8 @@
 - `fixtures/gate/known-bad/published-b.parquet` = 发布 B。
 - `.github/workflows/gate.yml`：pytest + 绿门禁必须过 + 发布 B 必须红。
 
-被卡住的「promote 发布 B」PR 链接（合并本闭环后补）：
+闭环 PR（已合并）：https://github.com/davore/PhysicalAIInfra/pull/1
+被卡住的 promote PR（gate 红，勿合）：https://github.com/davore/PhysicalAIInfra/pull/2
+CI 失败记录：https://github.com/davore/PhysicalAIInfra/actions/runs/34940283876
+
+私有仓库无法开分支保护（GitHub 要求 Pro 或公开）。门禁已经在 PR 上红；把仓库公开或升级后把 `gate` 设为 main 的必需检查。
