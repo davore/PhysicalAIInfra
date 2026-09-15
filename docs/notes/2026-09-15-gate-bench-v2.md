@@ -1,5 +1,7 @@
 # Robogate 门禁 benchmark v2（2026-09-15）
 
+HTML 版：[2026-09-15-gate-bench-v2.html](./2026-09-15-gate-bench-v2.html)
+
 第二轮：修 lag 盲区、改 bounds 来源、诊断发布 ACT 的归一化错位，并重训带 shuffle 的 ACT。
 基线改为会跟踪的自训 T30k（B'）。不测能不能泡咖啡，只测工具会不会漏、会不会误报。
 

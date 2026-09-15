@@ -106,7 +106,7 @@ inputs:
   - /tf
 target:
   adapter: python-policy          # 开环：只能跑开环断言
-  entry: policies.act:load
+  entry: lerobot                  # 或 module:callable；旧路径 lerobot.common.policies.act 已失效
   checkpoint: lerobot/act_aloha_sim_transfer_cube_human
 expected:
   # 开环：比较策略输出的动作（requires_mode 由 type 隐含）
@@ -137,7 +137,7 @@ source:
 
 | 适配器 | 模式 | M 阶段 | 说明 |
 | --- | --- | --- | --- |
-| `python-policy` | `open_loop` | M1 | 可选 extra `lerobot`；`load() -> policy`，逐帧喂观测取动作。用 HF Hub ACT checkpoint，不依赖空的 `ACT-adapter` 仓库 |
+| `python-policy` | `open_loop` | M1 | 可选 extra `lerobot`；`entry: lerobot` 走 `ACTPolicy.from_pretrained` + processors。旧路径 `lerobot.common.policies.act` 已失效 |
 | `ros2-node` | `closed_loop`（或开环订阅） | M2 | `rosbags` 回放输入 topic，docker / 本地启动被测节点，录输出。不依赖本机安装 ROS |
 | `isaac-lab` | `closed_loop` | M3 | 注入可得的初始状态，N 次扰动，统计通过率（本机已有 `IsaacLab` 仓库） |
 
