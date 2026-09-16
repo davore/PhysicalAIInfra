@@ -9,6 +9,7 @@ export PATH="${PREFIX}/bin:${PATH}"
 export HF_HOME="${HF_HOME:-/root/autodl-tmp/hf}"
 export HF_LEROBOT_HOME="${HF_LEROBOT_HOME:-/root/autodl-tmp/hf/lerobot}"
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
+export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
 export PYTHONNOUSERSITE=1
 
 SUITE="${SUITE:-scenarios/real}"

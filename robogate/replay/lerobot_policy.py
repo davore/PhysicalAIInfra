@@ -51,12 +51,6 @@ class LeRobotPolicyAdapter(Adapter):
 
         _isolate_lerobot_imports()
         policy = _load_policy(checkpoint, revision=revision, device=device)
-        preprocessor, postprocessor = _load_processors(
-            checkpoint, revision=revision, device=device
-        )
-        self._policy = policy
-        self._preprocessor = preprocessor
-        self._postprocessor = postprocessor
         self._input_keys = list(getattr(policy.config, "input_features", {}) or [])
 
         from lerobot.datasets.lerobot_dataset import LeRobotDataset
@@ -83,6 +77,17 @@ class LeRobotPolicyAdapter(Adapter):
         self._dataset = dataset
         _check_recorded_actions(dataset, slice_, self._offset)
 
+        preprocessor, postprocessor, processor_source = resolve_processors(
+            checkpoint,
+            revision=revision,
+            device=device,
+            dataset=dataset,
+            policy=policy,
+        )
+        self._policy = policy
+        self._preprocessor = preprocessor
+        self._postprocessor = postprocessor
+
         versions = {
             "lerobot": _pkg_version("lerobot"),
             "torch": torch.__version__,
@@ -91,6 +96,7 @@ class LeRobotPolicyAdapter(Adapter):
             "chunk_size": getattr(policy.config, "chunk_size", None),
             "n_action_steps": getattr(policy.config, "n_action_steps", None),
             "input_features": list(self._input_keys),
+            "processor_source": processor_source,
         }
         self.info = AdapterInfo(
             name="lerobot",
@@ -191,7 +197,15 @@ def _load_policy(checkpoint: str, *, revision: str | None, device: str) -> Any:
     kwargs: dict[str, Any] = {}
     if revision:
         kwargs["revision"] = revision
-    policy = ACTPolicy.from_pretrained(checkpoint, **kwargs)
+    try:
+        policy = ACTPolicy.from_pretrained(checkpoint, **kwargs)
+    except Exception as exc:
+        if not _unexpected_weight_keys(exc):
+            raise
+        try:
+            policy = ACTPolicy.from_pretrained(checkpoint, strict=False, **kwargs)
+        except TypeError:
+            raise exc from exc
     if hasattr(policy, "config") and hasattr(policy.config, "device"):
         policy.config.device = device
     if hasattr(policy, "to"):
@@ -236,6 +250,133 @@ def _load_processors(checkpoint: str, *, revision: str | None, device: str) -> t
     _set_processor_device(preprocessor, device)
     _set_processor_device(postprocessor, "cpu")
     return preprocessor, postprocessor
+
+
+def resolve_processors(
+    checkpoint: str,
+    *,
+    revision: str | None,
+    device: str,
+    dataset: Any,
+    policy: Any,
+) -> tuple[Any, Any, str]:
+    """Load processors from the checkpoint, or build them from dataset.meta.stats."""
+    if checkpoint_has_processors(checkpoint, revision):
+        return (*_load_processors(checkpoint, revision=revision, device=device), "checkpoint")
+    return (*processors_from_dataset_stats(dataset, policy, device), "dataset_stats")
+
+
+def checkpoint_has_processors(checkpoint: str, revision: str | None = None) -> bool:
+    from pathlib import Path
+
+    root = Path(checkpoint)
+    if (root / "policy_preprocessor.json").is_file():
+        return True
+    if root.is_dir():
+        return False
+    try:
+        from huggingface_hub import hf_hub_download
+
+        kwargs: dict[str, Any] = {
+            "repo_id": checkpoint,
+            "filename": "policy_preprocessor.json",
+        }
+        if revision:
+            kwargs["revision"] = revision
+        hf_hub_download(**kwargs)
+        return True
+    except Exception:  # noqa: BLE001 — missing file or offline Hub
+        return False
+
+
+def dataset_stats(dataset: Any) -> dict[str, Any]:
+    meta = getattr(dataset, "meta", None)
+    stats = getattr(meta, "stats", None) if meta is not None else None
+    if stats is None and isinstance(dataset, dict):
+        stats = dataset.get("stats")
+    return dict(stats) if stats else {}
+
+
+def _unexpected_weight_keys(exc: BaseException) -> bool:
+    msg = str(exc)
+    return "Unexpected key" in msg or "Missing key" in msg or "size mismatch" in msg.lower()
+
+
+def processors_from_dataset_stats(dataset: Any, policy: Any, device: str) -> tuple[Any, Any]:
+    """Build ACT pre/post processors from dataset.meta.stats (old Hub checkpoints)."""
+    _isolate_lerobot_imports()
+    from lerobot.processor.batch_processor import AddBatchDimensionProcessorStep
+    from lerobot.processor.converters import (
+        batch_to_transition,
+        policy_action_to_transition,
+        transition_to_batch,
+        transition_to_policy_action,
+    )
+    from lerobot.processor.device_processor import DeviceProcessorStep
+    from lerobot.processor.normalize_processor import (
+        NormalizerProcessorStep,
+        UnnormalizerProcessorStep,
+    )
+    from lerobot.processor.pipeline import DataProcessorPipeline
+    from lerobot.processor.rename_processor import RenameObservationsProcessorStep
+
+    stats = dataset_stats(dataset)
+    if not stats:
+        raise RuntimeError("dataset.meta.stats missing; cannot build processors")
+    features, norm_map = _policy_features(policy)
+    normalizer = NormalizerProcessorStep(
+        features=features,
+        norm_map=norm_map,
+        stats=stats,
+        device=device,
+    )
+    action_features = {
+        name: feat
+        for name, feat in features.items()
+        if name == "action" or getattr(feat, "type", None) == "ACTION"
+    }
+    unnormalizer = UnnormalizerProcessorStep(
+        features=action_features or features,
+        norm_map=norm_map,
+        stats=stats,
+        device="cpu",
+    )
+    preprocessor = DataProcessorPipeline(
+        steps=[
+            RenameObservationsProcessorStep(rename_map={}),
+            AddBatchDimensionProcessorStep(),
+            DeviceProcessorStep(device=device),
+            normalizer,
+        ],
+        name="policy_preprocessor",
+        to_transition=batch_to_transition,
+        to_output=transition_to_batch,
+    )
+    postprocessor = DataProcessorPipeline(
+        steps=[
+            unnormalizer,
+            DeviceProcessorStep(device="cpu"),
+        ],
+        name="policy_postprocessor",
+        to_transition=policy_action_to_transition,
+        to_output=transition_to_policy_action,
+    )
+    return preprocessor, postprocessor
+
+
+def _policy_features(policy: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    config = getattr(policy, "config", policy)
+    features: dict[str, Any] = {}
+    for group in ("input_features", "output_features"):
+        mapping = getattr(config, group, None) or {}
+        if isinstance(mapping, dict):
+            features.update(mapping)
+    norm_map = getattr(config, "normalization_mapping", None) or {
+        "VISUAL": "MEAN_STD",
+        "STATE": "MEAN_STD",
+        "ACTION": "MEAN_STD",
+    }
+    return features, dict(norm_map)
 
 
 def _set_processor_device(pipeline: Any, device: str) -> None:

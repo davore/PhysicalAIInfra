@@ -44,3 +44,22 @@ Intended Hub copy: `davore/act-aloha-static-coffee-bprime` (private). Upload wit
 `.cache/bprime/act-coffee-30000` (gitignored). Do not point
 `scenarios/real/*.yaml` `target.checkpoint` at the Hub id — that enters
 `content_hash` and would invalidate these fixtures.
+
+## Sim-cube (second known answer)
+
+Train-set tracking positive control, not a hold-out. Official
+`lerobot/act_aloha_sim_transfer_cube_human@ba73b2766f1371cdc133ca4efb97eb090d744625`
+on `scenarios/sim-cube` (ep0–9). Processors built from `dataset.meta.stats`
+(old Hub checkpoint has no processor json).
+
+| File | Meaning | Expected `robogate gate` |
+| --- | --- | --- |
+| `sim-cube/baseline.parquet` | official ACT, `eval_id=cube-official`, bounds +15% | — |
+| `sim-cube/candidate.parquet` | same eval | green vs baseline |
+
+```bash
+robogate eval scenarios/sim-cube --runs runs \
+  --version-contains act_aloha_sim_transfer_cube_human --eval-id cube-calib
+cp results/sim-cube/B-calib.parquet fixtures/gate/sim-cube/baseline.parquet
+cp results/sim-cube/B-calib.parquet fixtures/gate/sim-cube/candidate.parquet
+```

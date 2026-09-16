@@ -61,6 +61,8 @@ export HF_HOME="${HF_HOME:-/root/autodl-tmp/hf}"
 export HF_LEROBOT_HOME="${HF_LEROBOT_HOME:-/root/autodl-tmp/hf/lerobot}"
 # AutoDL often has IPv6 to huggingface.co unreachable; mirror stays on IPv4.
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
+# Xet CAS talks to huggingface.co and 401s on AutoDL; force regular Hub downloads.
+export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
 export PYTHONNOUSERSITE=1
 
 LOG="${JOB}/${MODULE}.log"

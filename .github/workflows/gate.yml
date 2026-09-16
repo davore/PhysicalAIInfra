@@ -30,3 +30,8 @@ jobs:
             echo "gate accepted the published checkpoint; the door is broken" >&2
             exit 1
           fi
+      - name: Official sim-cube ACT must stay green
+        run: >
+          robogate gate scenarios/sim-cube
+          --baseline fixtures/gate/sim-cube/baseline.parquet
+          --candidate fixtures/gate/sim-cube/candidate.parquet

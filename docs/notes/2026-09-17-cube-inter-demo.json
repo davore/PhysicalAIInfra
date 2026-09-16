@@ -1,0 +1,232 @@
+{
+  "n_pairs": 45,
+  "mean": 0.8144543631534323,
+  "std": 0.30731271144037836,
+  "pairs": [
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep1",
+      "mean_l2": 0.4542304029402415
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep2",
+      "mean_l2": 1.2455588946886014
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep3",
+      "mean_l2": 0.5090473673756679
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep4",
+      "mean_l2": 0.6148325045368445
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep5",
+      "mean_l2": 0.7029542105297023
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep6",
+      "mean_l2": 0.7360575152069331
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep7",
+      "mean_l2": 0.8699623993879436
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 0.5356933860609794
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep0",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 0.660271978590907
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep2",
+      "mean_l2": 1.2017788227749104
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep3",
+      "mean_l2": 0.5295933581766386
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep4",
+      "mean_l2": 0.7862504777947522
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep5",
+      "mean_l2": 0.9354203259168686
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep6",
+      "mean_l2": 0.5523264608733595
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep7",
+      "mean_l2": 0.740485174815551
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 0.3265128739208049
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep1",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 0.4297176706480995
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep2",
+      "b": "aloha-sim-transfer-cube-human-ep3",
+      "mean_l2": 1.3041953585320731
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep2",
+      "b": "aloha-sim-transfer-cube-human-ep4",
+      "mean_l2": 1.4897320028726342
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep2",
+      "b": "aloha-sim-transfer-cube-human-ep5",
+      "mean_l2": 1.306641255320768
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep2",
+      "b": "aloha-sim-transfer-cube-human-ep6",
+      "mean_l2": 1.2200406088942162
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep2",
+      "b": "aloha-sim-transfer-cube-human-ep7",
+      "mean_l2": 0.9991777220669511
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep2",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 1.1179519723358504
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep2",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 1.2050187033037545
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep3",
+      "b": "aloha-sim-transfer-cube-human-ep4",
+      "mean_l2": 0.7478393112786565
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep3",
+      "b": "aloha-sim-transfer-cube-human-ep5",
+      "mean_l2": 0.8118163783725774
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep3",
+      "b": "aloha-sim-transfer-cube-human-ep6",
+      "mean_l2": 0.7928222070637682
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep3",
+      "b": "aloha-sim-transfer-cube-human-ep7",
+      "mean_l2": 0.8831401995203362
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep3",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 0.5060891481041133
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep3",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 0.6450291868668623
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep4",
+      "b": "aloha-sim-transfer-cube-human-ep5",
+      "mean_l2": 0.5794094438781486
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep4",
+      "b": "aloha-sim-transfer-cube-human-ep6",
+      "mean_l2": 1.0535435619892457
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep4",
+      "b": "aloha-sim-transfer-cube-human-ep7",
+      "mean_l2": 1.2034353705900644
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep4",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 0.8398567068930483
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep4",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 0.9406653809172579
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep5",
+      "b": "aloha-sim-transfer-cube-human-ep6",
+      "mean_l2": 1.1905860976030231
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep5",
+      "b": "aloha-sim-transfer-cube-human-ep7",
+      "mean_l2": 1.0841671597966178
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep5",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 0.9756627727457483
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep5",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 1.0840090969760299
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep6",
+      "b": "aloha-sim-transfer-cube-human-ep7",
+      "mean_l2": 0.4444267783472197
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep6",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 0.48255960721461993
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep6",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 0.3707611831369463
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep7",
+      "b": "aloha-sim-transfer-cube-human-ep8",
+      "mean_l2": 0.6237816970771884
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep7",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 0.5915055805593338
+    },
+    {
+      "a": "aloha-sim-transfer-cube-human-ep8",
+      "b": "aloha-sim-transfer-cube-human-ep9",
+      "mean_l2": 0.32588802540858564
+    }
+  ]
+}
