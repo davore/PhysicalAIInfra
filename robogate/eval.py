@@ -30,6 +30,7 @@ def run_eval(
     noise: float = 0.0,
     eval_id: str | None = None,
     version_contains: str | None = None,
+    evidence: str = "fail",
 ) -> Path:
     items = load_suite(suite)
     rows: list[dict[str, Any]] = []
@@ -50,6 +51,7 @@ def run_eval(
                 noise=noise,
                 scenario_hash=digest,
                 version_contains=version_contains,
+                evidence=evidence,
             )
             if run.meta.scenario_id != scenario.id:
                 raise ValueError(
@@ -190,6 +192,7 @@ def _resolve_run(
     noise: float,
     scenario_hash: str | None = None,
     version_contains: str | None = None,
+    evidence: str = "fail",
 ) -> Run:
     if replay:
         from robogate.replay import adapter_entry, build_adapter, run_replay
@@ -206,6 +209,7 @@ def _resolve_run(
             device=device,
             perturbations=perturbations,
             scenario_hash=scenario_hash,
+            evidence=evidence,
         )
         return Run.load(dest)
     return Run.load(

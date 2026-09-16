@@ -21,10 +21,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.6"]
+dev = ["pytest>=8.0", "ruff>=0.6", "pillow>=10", "matplotlib>=3.8"]
 lerobot = ["lerobot>=0.4", "torchcodec"]
 mcap = ["mcap", "mcap-ros2-support", "rosbags"]
 report = ["jinja2>=3.1"]
+evidence = ["pillow>=10", "matplotlib>=3.8"]
 
 [project.scripts]
 robogate = "robogate.cli:main"

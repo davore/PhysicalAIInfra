@@ -78,4 +78,9 @@ class PerturbedAdapter(Adapter):
                 action = self._lag[0].copy()
             else:
                 action = self._lag.popleft()
-        return StepOut(action=action, latency_ms=out.latency_ms, confidence=out.confidence)
+        return StepOut(
+            action=action,
+            latency_ms=out.latency_ms,
+            confidence=out.confidence,
+            images=out.images,
+        )

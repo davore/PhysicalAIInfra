@@ -1,0 +1,113 @@
+{
+  "mean_l2": 1.8530481571141626,
+  "worst_frames": [
+    {
+      "index": 17,
+      "t_ns": 340000000,
+      "l2": 2.5082059876529392,
+      "per_dim_abs_diff": [
+        1.5531684006416457,
+        0.5711394783159598,
+        0.6484576999002619,
+        0.1728362647322325,
+        0.42729211742670414,
+        0.24448453192102246,
+        0.8803336484965615,
+        0.09960899150692851,
+        0.19100114607174026,
+        1.2762120126855405,
+        0.1622359281427196,
+        0.6106116748630681,
+        0.10095500098005496,
+        0.019417519279039865
+      ],
+      "files": []
+    },
+    {
+      "index": 15,
+      "t_ns": 300000000,
+      "l2": 2.350140194280186,
+      "per_dim_abs_diff": [
+        0.06786536703356719,
+        1.1551817433979439,
+        0.39359637107857887,
+        0.29014220836215376,
+        0.09775291391655118,
+        0.28290892341404655,
+        0.0036056798293782498,
+        0.28059905520457956,
+        0.4338083821608513,
+        1.5330183695244484,
+        0.038672529862108014,
+        1.0083303451166226,
+        0.3243003039516673,
+        0.33901986356199854
+      ],
+      "files": []
+    }
+  ],
+  "bounds": {
+    "n_frames_out": 24,
+    "dims_out": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "worst_frame": 17
+  },
+  "skipped": {
+    "frames": "no images on adapter"
+  },
+  "assertions": [
+    {
+      "type": "action_deviation",
+      "status": "fail",
+      "measured": 1.8530481571141626,
+      "threshold": 0.05,
+      "message": "mean L2=1.853048 exceeds max_l2=0.05",
+      "topic": "action"
+    },
+    {
+      "type": "latency",
+      "status": "pass",
+      "measured": 0.0,
+      "threshold": 80.0,
+      "message": "p95=0.00ms (budget 80.0ms); informational, not blocking",
+      "topic": "/policy/action"
+    },
+    {
+      "type": "action_bounds",
+      "status": "fail",
+      "measured": 2.4038216461515924,
+      "message": "actions leave bounds (max overflow L2=2.403822)",
+      "topic": "action"
+    },
+    {
+      "type": "action_smoothness",
+      "status": "fail",
+      "measured": 3.3360755210196267,
+      "threshold": 0.015001008046627044,
+      "message": "max frame delta L2=3.336076 exceeds max_delta=0.015001008046627044",
+      "topic": "action"
+    },
+    {
+      "type": "action_lag",
+      "status": "fail",
+      "measured": 23.0,
+      "threshold": 2.0,
+      "message": "lag=23 exceeds max_lag_frames=2",
+      "topic": "action"
+    }
+  ]
+}

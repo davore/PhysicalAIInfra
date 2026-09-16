@@ -17,6 +17,7 @@ class StepOut:
     action: np.ndarray
     latency_ms: float
     confidence: float | None = None
+    images: dict[str, Any] | None = None
 
 
 @dataclass

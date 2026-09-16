@@ -1,4 +1,4 @@
-"""robogate CLI. validate / schema / assert / extract / replay / eval / diff / gate."""
+"""robogate CLI. validate / schema / assert / extract / replay / evidence / eval / diff / gate."""
 
 from __future__ import annotations
 
@@ -180,6 +180,11 @@ def replay(
     adapter: str = typer.Option("auto", "--adapter", help="auto, lerobot, or mock."),
     noise: float = typer.Option(0.0, "--noise", help="Mock adapter Gaussian noise."),
     perturb: list[str] = typer.Option([], "--perturb", help="Repeatable key=value perturbation."),
+    evidence: str = typer.Option(
+        "fail",
+        "--evidence",
+        help="Write evidence/ on fail (default), always, or never.",
+    ),
 ) -> None:
     """Replay slice inputs against an adapter and write runs/<id>/."""
     from robogate.eval import _override_target
@@ -206,6 +211,7 @@ def replay(
             device=device,
             perturbations=perturb or None,
             scenario_hash=digest,
+            evidence=_evidence_mode(evidence),
         )
     except (ValidationError, ValueError, OSError, RuntimeError, ImportError, KeyError) as exc:
         typer.echo(f"error: {exc}", err=True)
@@ -237,6 +243,11 @@ def eval(  # noqa: A001
     version_contains: str | None = typer.Option(
         None, "--version-contains", help="Pick existing runs whose target_version contains this."
     ),
+    evidence: str = typer.Option(
+        "fail",
+        "--evidence",
+        help="When --replay, write evidence/ on fail (default), always, or never.",
+    ),
 ) -> None:
     """Run a suite, write results/<eval_id>.parquet + .json."""
     from robogate.eval import run_eval, summarize_eval
@@ -256,6 +267,7 @@ def eval(  # noqa: A001
             noise=noise,
             eval_id=eval_id,
             version_contains=version_contains,
+            evidence=_evidence_mode(evidence),
         )
     except (ValidationError, ValueError, OSError, RuntimeError) as exc:
         typer.echo(f"error: {exc}", err=True)
@@ -334,7 +346,53 @@ def gate(
         typer.echo("PASS" if payload["ok"] else "FAIL")
         for reason in payload["reasons"]:
             typer.echo(f"  {reason}")
+            sid = reason.split(":", 1)[0]
+            for item in payload.get("evidence") or []:
+                if item.get("scenario_id") == sid:
+                    typer.echo(f"  evidence: runs/{item['run_id']}/evidence/")
+                    break
     raise typer.Exit(0 if payload["ok"] else 1)
+
+
+@app.command("evidence")
+def evidence_cmd(
+    scenario: Path = typer.Argument(..., exists=True, readable=True),
+    run_dir: Path = typer.Argument(..., exists=True, file_okay=False),
+    slice_dir: Path | None = typer.Option(None, "--slice"),
+    top_k: int = typer.Option(5, "--top-k", min=1),
+    force: bool = typer.Option(False, "--force"),
+) -> None:
+    """Rebuild evidence/ from an existing run (parquet always; frames if video is local)."""
+    from robogate.evidence import rebuild_evidence
+    from robogate.slice import Slice
+
+    try:
+        loaded = load_scenario(scenario)
+        run = Run.load(run_dir)
+        if run.meta.scenario_id != loaded.id:
+            raise ValueError(
+                f"run scenario_id {run.meta.scenario_id} != scenario {loaded.id}"
+            )
+        slice_path = slice_dir or Path("slices") / loaded.id
+        slice_obj = Slice.load(slice_path) if slice_path.is_dir() else None
+        dest = rebuild_evidence(
+            loaded,
+            run,
+            slice_=slice_obj,
+            top_k=top_k,
+            force=force,
+        )
+    except (ValidationError, ValueError, OSError, FileExistsError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(f"ok {loaded.id} evidence={dest}")
+
+
+def _evidence_mode(value: str) -> str:
+    mode = value.strip().lower()
+    if mode not in {"fail", "always", "never"}:
+        raise typer.BadParameter("expected fail, always, or never")
+    return mode
 
 
 def main() -> None:

@@ -42,6 +42,8 @@ robogate gate scenarios/real \
 
 必须红。一句话：工具对会跟踪的模型给绿，对解错空间的发布权重给红。
 
+打开 `runs/<id>/evidence/`：`actions.png` 是预测 vs 示教折线，最差帧有竖线；旁边是该帧相机 PNG。这是断言附件，不是播放器。截图见 [2026-09-17-evidence.md](../notes/2026-09-17-evidence.md)。
+
 ## 2:00–2:40 CI 卡住发布
 
 打开 https://github.com/davore/PhysicalAIInfra/pull/2  

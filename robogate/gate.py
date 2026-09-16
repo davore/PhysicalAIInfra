@@ -66,6 +66,12 @@ def run_gate(
                     f"exceeds max_shift {max_shift}"
                 )
 
+    evidence = _candidate_evidence(
+        fold_b,
+        current,
+        runs_candidate,
+        version_contains=version_contains_candidate,
+    )
     return {
         "ok": not reasons,
         "n_scenarios": len(current),
@@ -73,7 +79,44 @@ def run_gate(
         "baseline": fold_a,
         "candidate": fold_b,
         "pred_shift": shifts,
+        "evidence": evidence,
     }
+
+
+def _candidate_evidence(
+    fold_b: dict[str, str],
+    current: dict[str, Any],
+    runs_candidate: Path | None,
+    *,
+    version_contains: str | None,
+) -> list[dict[str, str]]:
+    if runs_candidate is None:
+        return []
+    from robogate.eval import find_run
+
+    items: list[dict[str, str]] = []
+    for sid, status in fold_b.items():
+        if status not in {"fail", "error"} or sid not in current:
+            continue
+        try:
+            run_path = find_run(
+                runs_candidate,
+                sid,
+                version_contains=version_contains,
+            )
+        except FileNotFoundError:
+            continue
+        ev_dir = run_path / "evidence"
+        if not (ev_dir / "evidence.json").is_file():
+            continue
+        items.append(
+            {
+                "scenario_id": sid,
+                "run_id": run_path.name,
+                "path": str(ev_dir),
+            }
+        )
+    return items
 
 
 def _hashes(table: pl.DataFrame) -> dict[str, str]:
