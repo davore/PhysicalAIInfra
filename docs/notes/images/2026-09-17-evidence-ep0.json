@@ -1,0 +1,200 @@
+{
+  "scenario_id": "aloha-static-coffee-ep0",
+  "run_id": "aloha-static-coffee-ep0__act-aloha-static-coffee-test__20260916T035830Z",
+  "mean_l2": 2.5839842202301946,
+  "worst_frames": [
+    {
+      "index": 544,
+      "t_ns": 10880000000,
+      "l2": 3.3464549796797183,
+      "per_dim_abs_diff": [
+        0.3617865666747093,
+        0.7949604839086533,
+        0.045745670795440674,
+        0.9221472442150116,
+        0.24424535036087036,
+        2.943135142326355,
+        0.6525156497955322,
+        0.39657964557409286,
+        0.1129794716835022,
+        0.08732390403747559,
+        0.01059112697839737,
+        0.48136065900325775,
+        0.03037213161587715,
+        0.15992542169988155
+      ],
+      "files": [
+        "frame_0544_cam_high.png",
+        "frame_0544_cam_left_wrist.png",
+        "frame_0544_cam_low.png",
+        "frame_0544_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 546,
+      "t_ns": 10920000000,
+      "l2": 3.3442725709202974,
+      "per_dim_abs_diff": [
+        0.36981501430273056,
+        0.7849752753973007,
+        0.039336562156677246,
+        0.9202189743518829,
+        0.2374212145805359,
+        2.93866503238678,
+        0.675701841711998,
+        0.3973232787102461,
+        0.11171281337738037,
+        0.08378368616104126,
+        0.0104724932461977,
+        0.47825880348682404,
+        0.033940497785806656,
+        0.16372852586209774
+      ],
+      "files": [
+        "frame_0546_cam_high.png",
+        "frame_0546_cam_left_wrist.png",
+        "frame_0546_cam_low.png",
+        "frame_0546_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 552,
+      "t_ns": 11040000000,
+      "l2": 3.342605386457375,
+      "per_dim_abs_diff": [
+        0.37209131568670273,
+        0.7850386798381805,
+        0.04273718595504761,
+        0.9266030490398407,
+        0.24888932704925537,
+        2.933595895767212,
+        0.6727301329374313,
+        0.3972593192011118,
+        0.11380988359451294,
+        0.08101677894592285,
+        0.010089948773384094,
+        0.48111915588378906,
+        0.03091289848089218,
+        0.16580825112760067
+      ],
+      "files": [
+        "frame_0552_cam_high.png",
+        "frame_0552_cam_left_wrist.png",
+        "frame_0552_cam_low.png",
+        "frame_0552_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 547,
+      "t_ns": 10940000000,
+      "l2": 3.3408161323327437,
+      "per_dim_abs_diff": [
+        0.3684436306357384,
+        0.7804835885763168,
+        0.046724021434783936,
+        0.9246709048748016,
+        0.24742728471755981,
+        2.935256004333496,
+        0.6677329838275909,
+        0.39406232722103596,
+        0.12026029825210571,
+        0.08090555667877197,
+        0.010179607197642326,
+        0.48205339908599854,
+        0.030856098979711533,
+        0.16250444203615189
+      ],
+      "files": [
+        "frame_0547_cam_high.png",
+        "frame_0547_cam_left_wrist.png",
+        "frame_0547_cam_low.png",
+        "frame_0547_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 548,
+      "t_ns": 10960000000,
+      "l2": 3.3398028134595874,
+      "per_dim_abs_diff": [
+        0.37258046120405197,
+        0.8016469925642014,
+        0.04685807228088379,
+        0.9262135326862335,
+        0.20922702550888062,
+        2.9294499158859253,
+        0.6716992408037186,
+        0.3967420216649771,
+        0.10799413919448853,
+        0.07310861349105835,
+        0.009252823889255524,
+        0.48080405592918396,
+        0.033029329031705856,
+        0.17137091420590878
+      ],
+      "files": [
+        "frame_0548_cam_high.png",
+        "frame_0548_cam_left_wrist.png",
+        "frame_0548_cam_low.png",
+        "frame_0548_cam_right_wrist.png"
+      ]
+    }
+  ],
+  "bounds": {
+    "n_frames_out": 1100,
+    "dims_out": [
+      1,
+      4,
+      5
+    ],
+    "worst_frame": 421
+  },
+  "assertions": [
+    {
+      "type": "action_deviation",
+      "status": "fail",
+      "measured": 2.5839842202301946,
+      "threshold": 2.2324058120691306,
+      "message": "mean L2=2.583984 exceeds max_l2=2.2324058120691306",
+      "topic": "action"
+    },
+    {
+      "type": "latency",
+      "status": "pass",
+      "measured": 76.26681085675955,
+      "threshold": 80.0,
+      "message": "p95=76.27ms (budget 80.0ms); informational, not blocking",
+      "topic": "/policy/action"
+    },
+    {
+      "type": "confidence_floor",
+      "status": "skipped",
+      "threshold": 0.3,
+      "message": "adapter did not record confidence",
+      "topic": "/policy/action"
+    },
+    {
+      "type": "action_bounds",
+      "status": "fail",
+      "measured": 0.20436294749379158,
+      "message": "actions leave bounds (max overflow L2=0.204363)",
+      "topic": "action"
+    },
+    {
+      "type": "action_smoothness",
+      "status": "pass",
+      "measured": 0.22685811960998586,
+      "threshold": 1.4456728495040385,
+      "message": "max frame delta L2=0.226858 (max_delta=1.4456728495040385)",
+      "topic": "action"
+    },
+    {
+      "type": "action_lag",
+      "status": "pass",
+      "measured": 49.0,
+      "threshold": 14.0,
+      "message": "tracking too weak to measure lag (best k=49 improves L2 by 0.2%)",
+      "topic": "action"
+    }
+  ],
+  "skipped": {}
+}
