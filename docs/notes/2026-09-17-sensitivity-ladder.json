@@ -1,0 +1,1616 @@
+{
+  "needle": "act-coffee-30000",
+  "n_scenarios": 11,
+  "sources": {
+    "aloha-static-coffee-ep0": "aloha-static-coffee-ep0__act-coffee-30000__20260914T144519Z",
+    "aloha-static-coffee-ep1": "aloha-static-coffee-ep1__act-coffee-30000__20260914T144803Z",
+    "aloha-static-coffee-ep2": "aloha-static-coffee-ep2__act-coffee-30000__20260914T145047Z",
+    "aloha-static-coffee-ep3": "aloha-static-coffee-ep3__act-coffee-30000__20260914T145341Z",
+    "aloha-static-coffee-ep4": "aloha-static-coffee-ep4__act-coffee-30000__20260914T145559Z",
+    "aloha-static-coffee-ep5": "aloha-static-coffee-ep5__act-coffee-30000__20260914T145812Z",
+    "aloha-static-coffee-ep6": "aloha-static-coffee-ep6__act-coffee-30000__20260914T150128Z",
+    "aloha-static-coffee-ep7": "aloha-static-coffee-ep7__act-coffee-30000__20260914T150355Z",
+    "aloha-static-coffee-ep8": "aloha-static-coffee-ep8__act-coffee-30000__20260914T150619Z",
+    "aloha-static-coffee-ep9": "aloha-static-coffee-ep9__act-coffee-30000__20260914T150857Z",
+    "coffee-published-action-space-mismatch": "coffee-published-action-space-mismatch__act-coffee-30000__20260915T070515Z"
+  },
+  "ep0_recorded_std": {
+    "d3": 0.18147190512776654,
+    "d4": 0.18124002950930707
+  },
+  "levels": [
+    {
+      "name": "bias-0.01",
+      "kind": "bias",
+      "group": "bias",
+      "value": 0.01,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-bias-0.01.parquet"
+    },
+    {
+      "name": "bias-0.02",
+      "kind": "bias",
+      "group": "bias",
+      "value": 0.02,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-bias-0.02.parquet"
+    },
+    {
+      "name": "bias-0.05",
+      "kind": "bias",
+      "group": "bias",
+      "value": 0.05,
+      "dim": null,
+      "n": 11,
+      "n_red": 3,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 3
+      },
+      "parquet": "results/ladder-bias-0.05.parquet"
+    },
+    {
+      "name": "bias-0.1",
+      "kind": "bias",
+      "group": "bias",
+      "value": 0.1,
+      "dim": null,
+      "n": 11,
+      "n_red": 10,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 10
+      },
+      "parquet": "results/ladder-bias-0.1.parquet"
+    },
+    {
+      "name": "dim_bias-d0-0.05",
+      "kind": "dim_bias",
+      "group": "dim_bias_d0",
+      "value": 0.05,
+      "dim": 0,
+      "n": 11,
+      "n_red": 2,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 2
+      },
+      "parquet": "results/ladder-dim_bias-d0-0.05.parquet"
+    },
+    {
+      "name": "dim_bias-d0-0.1",
+      "kind": "dim_bias",
+      "group": "dim_bias_d0",
+      "value": 0.1,
+      "dim": 0,
+      "n": 11,
+      "n_red": 6,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 6
+      },
+      "parquet": "results/ladder-dim_bias-d0-0.1.parquet"
+    },
+    {
+      "name": "dim_bias-d0-0.2",
+      "kind": "dim_bias",
+      "group": "dim_bias_d0",
+      "value": 0.2,
+      "dim": 0,
+      "n": 11,
+      "n_red": 11,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail",
+        "coffee-published-action-space-mismatch: baseline pass became fail",
+        "coffee-published-action-space-mismatch: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "fail"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds",
+        "coffee-published-action-space-mismatch": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 11
+      },
+      "parquet": "results/ladder-dim_bias-d0-0.2.parquet"
+    },
+    {
+      "name": "dim_bias-d0-0.5",
+      "kind": "dim_bias",
+      "group": "dim_bias_d0",
+      "value": 0.5,
+      "dim": 0,
+      "n": 11,
+      "n_red": 11,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail",
+        "coffee-published-action-space-mismatch: baseline pass became fail",
+        "coffee-published-action-space-mismatch: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "fail"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds",
+        "coffee-published-action-space-mismatch": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 11
+      },
+      "parquet": "results/ladder-dim_bias-d0-0.5.parquet"
+    },
+    {
+      "name": "dim_bias-d6-0.05",
+      "kind": "dim_bias",
+      "group": "dim_bias_d6",
+      "value": 0.05,
+      "dim": 6,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-dim_bias-d6-0.05.parquet"
+    },
+    {
+      "name": "dim_bias-d6-0.1",
+      "kind": "dim_bias",
+      "group": "dim_bias_d6",
+      "value": 0.1,
+      "dim": 6,
+      "n": 11,
+      "n_red": 7,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 7
+      },
+      "parquet": "results/ladder-dim_bias-d6-0.1.parquet"
+    },
+    {
+      "name": "dim_bias-d6-0.2",
+      "kind": "dim_bias",
+      "group": "dim_bias_d6",
+      "value": 0.2,
+      "dim": 6,
+      "n": 11,
+      "n_red": 10,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 10
+      },
+      "parquet": "results/ladder-dim_bias-d6-0.2.parquet"
+    },
+    {
+      "name": "dim_bias-d6-0.5",
+      "kind": "dim_bias",
+      "group": "dim_bias_d6",
+      "value": 0.5,
+      "dim": 6,
+      "n": 11,
+      "n_red": 11,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail",
+        "coffee-published-action-space-mismatch: baseline pass became fail",
+        "coffee-published-action-space-mismatch: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "fail"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds",
+        "coffee-published-action-space-mismatch": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 11
+      },
+      "parquet": "results/ladder-dim_bias-d6-0.5.parquet"
+    },
+    {
+      "name": "gain-0.9",
+      "kind": "gain",
+      "group": "gain_under",
+      "value": 0.9,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-gain-0.9.parquet"
+    },
+    {
+      "name": "gain-0.8",
+      "kind": "gain",
+      "group": "gain_under",
+      "value": 0.8,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-gain-0.8.parquet"
+    },
+    {
+      "name": "gain-0.5",
+      "kind": "gain",
+      "group": "gain_under",
+      "value": 0.5,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-gain-0.5.parquet"
+    },
+    {
+      "name": "gain-1.1",
+      "kind": "gain",
+      "group": "gain_over",
+      "value": 1.1,
+      "dim": null,
+      "n": 11,
+      "n_red": 4,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 4
+      },
+      "parquet": "results/ladder-gain-1.1.parquet"
+    },
+    {
+      "name": "gain-1.2",
+      "kind": "gain",
+      "group": "gain_over",
+      "value": 1.2,
+      "dim": null,
+      "n": 11,
+      "n_red": 10,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 10
+      },
+      "parquet": "results/ladder-gain-1.2.parquet"
+    },
+    {
+      "name": "noise-0.01",
+      "kind": "noise",
+      "group": "noise",
+      "value": 0.01,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-noise-0.01.parquet"
+    },
+    {
+      "name": "noise-0.02",
+      "kind": "noise",
+      "group": "noise",
+      "value": 0.02,
+      "dim": null,
+      "n": 11,
+      "n_red": 2,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 2
+      },
+      "parquet": "results/ladder-noise-0.02.parquet"
+    },
+    {
+      "name": "noise-0.05",
+      "kind": "noise",
+      "group": "noise",
+      "value": 0.05,
+      "dim": null,
+      "n": 11,
+      "n_red": 11,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail",
+        "coffee-published-action-space-mismatch: baseline pass became fail",
+        "coffee-published-action-space-mismatch: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "fail"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep5": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds",
+        "coffee-published-action-space-mismatch": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 11
+      },
+      "parquet": "results/ladder-noise-0.05.parquet"
+    },
+    {
+      "name": "lag-2",
+      "kind": "lag",
+      "group": "lag",
+      "value": 2,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-lag-2.parquet",
+      "pred_shift": [
+        {
+          "scenario_id": "aloha-static-coffee-ep0",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.034657335391683274
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep1",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.0379204593232451
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep2",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.03197905692192115
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep3",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.03390207396842104
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep4",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.03288841683241163
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep5",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.03225146912519769
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep6",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.029290269935216134
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep7",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.03319972341306297
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep8",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.033320302445820224
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep9",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.03334015690574175
+        },
+        {
+          "scenario_id": "coffee-published-action-space-mismatch",
+          "shift": 2,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.03096704212060383
+        }
+      ],
+      "unique_shifts": [
+        2
+      ],
+      "shift_ok": true,
+      "shift_reasons": []
+    },
+    {
+      "name": "lag-5",
+      "kind": "lag",
+      "group": "lag",
+      "value": 5,
+      "dim": null,
+      "n": 11,
+      "n_red": 2,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep3": "action_lag",
+        "aloha-static-coffee-ep5": "action_lag"
+      },
+      "first_fail_counts": {
+        "action_lag": 2
+      },
+      "parquet": "results/ladder-lag-5.parquet",
+      "pred_shift": [
+        {
+          "scenario_id": "aloha-static-coffee-ep0",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.08165043566352999
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep1",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.0897487028152894
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep2",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.07487429520250068
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep3",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.07984462120316305
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep4",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.07767090163279308
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep5",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.07613473332164122
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep6",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.06920826493169635
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep7",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.07826604335757656
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep8",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.07875243635766334
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep9",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.07867931487589469
+        },
+        {
+          "scenario_id": "coffee-published-action-space-mismatch",
+          "shift": 5,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.073822725473567
+        }
+      ],
+      "unique_shifts": [
+        5
+      ],
+      "shift_ok": false,
+      "shift_reasons": [
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep0: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep1: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep2: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep3: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep4: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep5: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep6: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep7: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep8: pred_shift 5 exceeds max_shift 2",
+        "aloha-static-coffee-ep9: pred_shift 5 exceeds max_shift 2",
+        "coffee-published-action-space-mismatch: pred_shift 5 exceeds max_shift 2"
+      ]
+    },
+    {
+      "name": "lag-10",
+      "kind": "lag",
+      "group": "lag",
+      "value": 10,
+      "dim": null,
+      "n": 11,
+      "n_red": 5,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep3": "action_lag",
+        "aloha-static-coffee-ep4": "action_lag",
+        "aloha-static-coffee-ep5": "action_lag",
+        "aloha-static-coffee-ep7": "action_lag",
+        "aloha-static-coffee-ep8": "action_lag"
+      },
+      "first_fail_counts": {
+        "action_lag": 5
+      },
+      "parquet": "results/ladder-lag-10.parquet",
+      "pred_shift": [
+        {
+          "scenario_id": "aloha-static-coffee-ep0",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.15673612084150385
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep1",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.17146650435939137
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep2",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.14229680433067313
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep3",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.1524033056384897
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep4",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.14956480733346733
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep5",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.14583838969092483
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep6",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.13303108544253509
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep7",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.15142093920452232
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep8",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.15119455194232875
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep9",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.15045570525439367
+        },
+        {
+          "scenario_id": "coffee-published-action-space-mismatch",
+          "shift": 10,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.1422692009880614
+        }
+      ],
+      "unique_shifts": [
+        10
+      ],
+      "shift_ok": false,
+      "shift_reasons": [
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep0: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep1: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep2: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep3: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep4: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep5: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep6: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep7: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep8: pred_shift 10 exceeds max_shift 2",
+        "aloha-static-coffee-ep9: pred_shift 10 exceeds max_shift 2",
+        "coffee-published-action-space-mismatch: pred_shift 10 exceeds max_shift 2"
+      ]
+    },
+    {
+      "name": "lag-15",
+      "kind": "lag",
+      "group": "lag",
+      "value": 15,
+      "dim": null,
+      "n": 11,
+      "n_red": 7,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "fail",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep2": "action_lag",
+        "aloha-static-coffee-ep3": "action_lag",
+        "aloha-static-coffee-ep4": "action_lag",
+        "aloha-static-coffee-ep5": "action_lag",
+        "aloha-static-coffee-ep6": "action_lag",
+        "aloha-static-coffee-ep7": "action_lag",
+        "aloha-static-coffee-ep8": "action_lag"
+      },
+      "first_fail_counts": {
+        "action_lag": 7
+      },
+      "parquet": "results/ladder-lag-15.parquet",
+      "pred_shift": [
+        {
+          "scenario_id": "aloha-static-coffee-ep0",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.22529001824915684
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep1",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.24572873226645242
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep2",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.20458200556890363
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep3",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.2193626206184185
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep4",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.21617049150318454
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep5",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.20938741034756442
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep6",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.19240812889689876
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep7",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.2204776773165858
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep8",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.21858450113864872
+        },
+        {
+          "scenario_id": "aloha-static-coffee-ep9",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.2152231034592375
+        },
+        {
+          "scenario_id": "coffee-published-action-space-mismatch",
+          "shift": 15,
+          "l2_aligned": 0.0,
+          "l2_zero": 0.20582893201199018
+        }
+      ],
+      "unique_shifts": [
+        15
+      ],
+      "shift_ok": false,
+      "shift_reasons": [
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep5: baseline pass became fail",
+        "aloha-static-coffee-ep5: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep0: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep1: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep2: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep3: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep4: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep5: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep6: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep7: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep8: pred_shift 15 exceeds max_shift 2",
+        "aloha-static-coffee-ep9: pred_shift 15 exceeds max_shift 2",
+        "coffee-published-action-space-mismatch: pred_shift 15 exceeds max_shift 2"
+      ]
+    },
+    {
+      "name": "stats_swap",
+      "kind": "stats_swap",
+      "group": "stats_swap",
+      "value": null,
+      "dim": null,
+      "n": 11,
+      "n_red": 9,
+      "gate_ok": false,
+      "reasons": [
+        "aloha-static-coffee-ep0: baseline pass became fail",
+        "aloha-static-coffee-ep0: blocking is fail",
+        "aloha-static-coffee-ep1: baseline pass became fail",
+        "aloha-static-coffee-ep1: blocking is fail",
+        "aloha-static-coffee-ep2: baseline pass became fail",
+        "aloha-static-coffee-ep2: blocking is fail",
+        "aloha-static-coffee-ep3: baseline pass became fail",
+        "aloha-static-coffee-ep3: blocking is fail",
+        "aloha-static-coffee-ep4: baseline pass became fail",
+        "aloha-static-coffee-ep4: blocking is fail",
+        "aloha-static-coffee-ep6: baseline pass became fail",
+        "aloha-static-coffee-ep6: blocking is fail",
+        "aloha-static-coffee-ep7: baseline pass became fail",
+        "aloha-static-coffee-ep7: blocking is fail",
+        "aloha-static-coffee-ep8: baseline pass became fail",
+        "aloha-static-coffee-ep8: blocking is fail",
+        "aloha-static-coffee-ep9: baseline pass became fail",
+        "aloha-static-coffee-ep9: blocking is fail"
+      ],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "fail",
+        "aloha-static-coffee-ep1": "fail",
+        "aloha-static-coffee-ep2": "fail",
+        "aloha-static-coffee-ep3": "fail",
+        "aloha-static-coffee-ep4": "fail",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "fail",
+        "aloha-static-coffee-ep7": "fail",
+        "aloha-static-coffee-ep8": "fail",
+        "aloha-static-coffee-ep9": "fail",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {
+        "aloha-static-coffee-ep0": "action_bounds",
+        "aloha-static-coffee-ep1": "action_bounds",
+        "aloha-static-coffee-ep2": "action_bounds",
+        "aloha-static-coffee-ep3": "action_bounds",
+        "aloha-static-coffee-ep4": "action_bounds",
+        "aloha-static-coffee-ep6": "action_bounds",
+        "aloha-static-coffee-ep7": "action_bounds",
+        "aloha-static-coffee-ep8": "action_bounds",
+        "aloha-static-coffee-ep9": "action_bounds"
+      },
+      "first_fail_counts": {
+        "action_bounds": 9
+      },
+      "parquet": "results/ladder-stats_swap.parquet"
+    },
+    {
+      "name": "constant",
+      "kind": "constant",
+      "group": "constant",
+      "value": null,
+      "dim": null,
+      "n": 11,
+      "n_red": 0,
+      "gate_ok": true,
+      "reasons": [],
+      "by_scenario": {
+        "aloha-static-coffee-ep0": "pass",
+        "aloha-static-coffee-ep1": "pass",
+        "aloha-static-coffee-ep2": "pass",
+        "aloha-static-coffee-ep3": "pass",
+        "aloha-static-coffee-ep4": "pass",
+        "aloha-static-coffee-ep5": "pass",
+        "aloha-static-coffee-ep6": "pass",
+        "aloha-static-coffee-ep7": "pass",
+        "aloha-static-coffee-ep8": "pass",
+        "aloha-static-coffee-ep9": "pass",
+        "coffee-published-action-space-mismatch": "pass"
+      },
+      "first_fail": {},
+      "first_fail_counts": {},
+      "parquet": "results/ladder-constant.parquet"
+    }
+  ],
+  "summary": {
+    "bias": {
+      "detected": true,
+      "level": "0.05",
+      "name": "bias-0.05",
+      "n_red": 3,
+      "n": 11,
+      "first_fail": {
+        "action_bounds": 3
+      },
+      "gate_ok": false
+    },
+    "dim_bias_d0": {
+      "detected": true,
+      "level": "0.05",
+      "name": "dim_bias-d0-0.05",
+      "n_red": 2,
+      "n": 11,
+      "first_fail": {
+        "action_bounds": 2
+      },
+      "gate_ok": false
+    },
+    "dim_bias_d6": {
+      "detected": true,
+      "level": "0.1",
+      "name": "dim_bias-d6-0.1",
+      "n_red": 7,
+      "n": 11,
+      "first_fail": {
+        "action_bounds": 7
+      },
+      "gate_ok": false
+    },
+    "gain_under": {
+      "detected": false,
+      "level": "未检出",
+      "n_red": 0,
+      "n": 11,
+      "first_fail": {}
+    },
+    "gain_over": {
+      "detected": true,
+      "level": "1.1",
+      "name": "gain-1.1",
+      "n_red": 4,
+      "n": 11,
+      "first_fail": {
+        "action_bounds": 4
+      },
+      "gate_ok": false
+    },
+    "noise": {
+      "detected": true,
+      "level": "0.02",
+      "name": "noise-0.02",
+      "n_red": 2,
+      "n": 11,
+      "first_fail": {
+        "action_bounds": 2
+      },
+      "gate_ok": false
+    },
+    "lag_assert": {
+      "detected": true,
+      "level": "5",
+      "name": "lag-5",
+      "n_red": 2,
+      "n": 11,
+      "first_fail": {
+        "action_lag": 2
+      },
+      "gate_ok": false
+    },
+    "lag_pred_shift": {
+      "detected": true,
+      "level": "5",
+      "name": "lag-5",
+      "n_red": 2,
+      "n": 11,
+      "first_fail": {
+        "action_lag": 2
+      },
+      "gate_ok": false
+    },
+    "stats_swap": {
+      "detected": true,
+      "level": "检出",
+      "name": "stats_swap",
+      "n_red": 9,
+      "n": 11,
+      "first_fail": {
+        "action_bounds": 9
+      },
+      "gate_ok": false
+    },
+    "constant": {
+      "detected": false,
+      "level": "未检出",
+      "n_red": 0,
+      "n": 11,
+      "first_fail": {}
+    }
+  }
+}

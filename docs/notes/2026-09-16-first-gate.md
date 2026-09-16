@@ -24,7 +24,7 @@
 | B' 窗内 L2 | 2.003（过 2.232） |
 | 发布 B 窗内 L2 | 3.026（红）；bounds overflow 0.170 |
 
-这是发布事故，不是掉胶囊的任务事故。checkpoint 的 action 反归一化统计量贴近 `observation.state`（Δ 0.015），但把统计量换成数据集 `action` 后 ep0 的 corr 仍是 0.08、std 比仍约 0.11——均值偏移能消一点，形状跟不上。见 [2026-09-17-evidence.md](./2026-09-17-evidence.md) 归因段。
+这是发布事故，不是掉胶囊的任务事故。发布权重不跟踪 coffee；checkpoint 的 action 反归一化统计量也贴错（贴近 `observation.state`，Δ 0.015）。换数据集 `action` 统计量只能消均值偏移，corr 仍是 0.08。见 [2026-09-17-evidence.md](./2026-09-17-evidence.md) 归因段。
 
 ## 引擎修正
 
