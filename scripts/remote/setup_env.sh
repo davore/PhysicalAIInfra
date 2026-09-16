@@ -46,6 +46,7 @@ import lerobot
 print("lerobot already present")
 PY
 pip install --no-cache-dir --no-deps torchcodec || true
+pip install --no-cache-dir "pillow>=10" "matplotlib>=3.8"
 pip cache purge || true
 python - <<'PY'
 import torch

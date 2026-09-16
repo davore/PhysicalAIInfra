@@ -6,7 +6,7 @@
 
 Robot CI：Incident → Scenario → Replay → Assert → Report → Gate。不做可视化、不做采集、不做硬件。
 
-CLI 已落地：`validate` / `schema` / `extract`（LeRobot v3）/ `replay` / `assert` / `eval` / `diff` / `gate`。
+CLI 已落地：`validate` / `schema` / `extract`（LeRobot v3）/ `replay` / `assert` / `evidence` / `eval` / `diff` / `gate`。
 
 ## 安装
 
@@ -54,6 +54,8 @@ robogate gate scenarios/real \
 ```
 
 把 `fixtures/gate/known-bad/published-b.parquet` 当成 candidate 必须红。GitHub Action 在每个 PR 上跑这两次判定。
+
+红了看 `runs/<id>/evidence/`（最差帧 PNG、动作折线、`evidence.json`）。远端回放后用 `bash scripts/remote/sync.sh pull runs/<id>/evidence` 拉回附件。通过的 scenario 不产这个目录；`robogate evidence <scenario> <run>` 可事后从 parquet 重建。
 
 `assert` 要求 `run.meta.scenario_id` 与 scenario `id` 一致。缺列或维度不对是 `error`（失败）。适配器没记的 latency / confidence，以及开环 run 上的闭环断言，标 `skipped`，不算失败。
 

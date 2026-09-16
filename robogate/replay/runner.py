@@ -9,8 +9,9 @@ from typing import Any
 import numpy as np
 import polars as pl
 
+from robogate.evidence import DEFAULT_TOP_K, TopKFrames, should_write, write_evidence
 from robogate.replay.base import Adapter, AdapterInfo
-from robogate.run import RunMeta, RunMode, write_meta
+from robogate.run import Run, RunMeta, RunMode, write_meta
 from robogate.scenario import Scenario, content_hash
 from robogate.slice import Slice
 
@@ -25,6 +26,7 @@ def run_replay(
     host: str | None = None,
     perturbations: list[str] | None = None,
     scenario_hash: str | None = None,
+    evidence: str = "fail",
 ) -> Path:
     adapter.load(scenario.target, slice_, device=device)
     adapter.reset()
@@ -35,13 +37,19 @@ def run_replay(
     predicted: list[list[float]] = []
     latency: list[float] = []
     confidence: list[float | None] = []
+    topk = TopKFrames(k=DEFAULT_TOP_K)
     for i in range(n):
         obs = _frame_obs(slice_, i)
         print(f"[replay] scenario 1/1 frame {i + 1}/{n}", flush=True)
         step = adapter.step(obs, i)
-        predicted.append(np.asarray(step.action, dtype=np.float64).reshape(-1).tolist())
+        pred = np.asarray(step.action, dtype=np.float64).reshape(-1)
+        predicted.append(pred.tolist())
         latency.append(float(step.latency_ms))
         confidence.append(step.confidence)
+        rec = np.asarray(recorded_values[i], dtype=np.float64).reshape(-1)
+        dim = min(pred.size, rec.size)
+        l2 = float(np.linalg.norm(pred[:dim] - rec[:dim])) if dim else 0.0
+        topk.feed(i, l2, step.images)
 
     dest = out_root / _run_name(scenario.id, adapter.info, perturbations)
     outputs = dest / "outputs"
@@ -72,7 +80,48 @@ def run_replay(
             perturbations=list(perturbations) if perturbations else None,
         ),
     )
+    _maybe_write_evidence(
+        dest,
+        scenario,
+        evidence=evidence,
+        topk=topk,
+        predicted=predicted,
+        recorded_values=recorded_values,
+        t_ns=t_ns,
+    )
     return dest
+
+
+def _maybe_write_evidence(
+    dest: Path,
+    scenario: Scenario,
+    *,
+    evidence: str,
+    topk: TopKFrames,
+    predicted: list[list[float]],
+    recorded_values: list[Any],
+    t_ns: list[int],
+) -> None:
+    if evidence == "never":
+        return
+    try:
+        from robogate.asserts import run_assertions
+
+        run = Run.load(dest)
+        results = run_assertions(scenario, run)
+        if not should_write(results, evidence):
+            return
+        write_evidence(
+            dest,
+            scenario,
+            results,
+            topk.ranked(),
+            np.asarray(predicted, dtype=np.float64),
+            np.asarray(recorded_values, dtype=np.float64),
+            t_ns,
+        )
+    except Exception as exc:  # noqa: BLE001 — evidence must not redden replay
+        print(f"[evidence] skipped: {type(exc).__name__}: {exc}", flush=True)
 
 
 def _frame_obs(slice_: Slice, index: int) -> dict[str, Any]:

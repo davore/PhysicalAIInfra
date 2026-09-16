@@ -132,7 +132,12 @@ class LeRobotPolicyAdapter(Adapter):
         if self._postprocessor is not None:
             action = self._postprocessor(action)
         latency_ms = (time.perf_counter() - t0) * 1000.0
-        return StepOut(action=_as_numpy(action), latency_ms=latency_ms, confidence=None)
+        return StepOut(
+            action=_as_numpy(action),
+            latency_ms=latency_ms,
+            confidence=None,
+            images=_batch_images(batch),
+        )
 
 
 def _isolate_lerobot_imports() -> None:
@@ -637,6 +642,15 @@ def _add_noise(value: Any, sigma: float, rng: np.random.Generator) -> Any:
 
         return value + torch.as_tensor(noise, device=value.device, dtype=value.dtype)
     return np.asarray(value, dtype=np.float64) + noise
+
+
+def _batch_images(batch: dict[str, Any]) -> dict[str, Any] | None:
+    images: dict[str, Any] = {}
+    for key, value in batch.items():
+        if not isinstance(key, str) or not key.startswith("observation.images."):
+            continue
+        images[key.removeprefix("observation.images.")] = value
+    return images or None
 
 
 def _select_inputs(row: dict[str, Any], keys: list[str]) -> dict[str, Any]:
