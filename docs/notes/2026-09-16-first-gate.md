@@ -4,7 +4,7 @@
 
 ## 标定
 
-- B' = `/root/autodl-tmp/ckpts/v2/act-coffee-30000`（冻结，不重训）。
+- B' = `/root/autodl-tmp/ckpts/v2/act-coffee-30000`（冻结，不重训）。Hub 目标：`davore/act-aloha-static-coffee-bprime`（私有；`scripts/remote/upload_bprime.py`）。本机备份 `.cache/bprime/act-coffee-30000`（gitignored）。
 - `action_bounds`：示教包络 pad **0.15**（0.10 时 ep3/6/7 仍出界 0.034 / 0.029 / 0.006 L2）。
 - 整套 `scenarios/real`（10 条整集 + 1 条事故窗）重写后：`max_l2 = 2.232`（mean+3σ，事故窗把 B' 的 L2 拉高了）、`max_delta = 1.446`、`max_lag_frames = 14`。
 - B'：11/11 绿。同一 parquet 对自身 gate 绿（误报 0）。
@@ -41,4 +41,20 @@
 被卡住的 promote PR（gate 红，勿合）：https://github.com/davore/PhysicalAIInfra/pull/2
 CI 失败记录：https://github.com/davore/PhysicalAIInfra/actions/runs/34940283876
 
-私有仓库无法开分支保护（GitHub 要求 Pro 或公开）。门禁已经在 PR 上红；把仓库公开或升级后把 `gate` 设为 main 的必需检查。
+## GPU 复验（2026-09-16）
+
+数字摘要：[2026-09-16-gpu-verify.json](./2026-09-16-gpu-verify.json)。5090 与 MicroBo FDTD 共用，等卡空后 11:36–12:16 CST 重放。
+
+| 项 | 结果 |
+| --- | --- |
+| B'（T30k）10 集 | 10/10 绿；tracking corr 0.902 / L2 0.584 |
+| 发布 B 10 集 | 10/10 红；corr ≈ 0 / L2 2.287 |
+| gate B' → 发布 B | 红 10/10；pred_shift 全 0 |
+| 合成 lag-10 | pred_shift 全 10 |
+| 旧 T2k / T10k 用现行阈值 | T2k 红、T10k 绿 |
+
+ep0 最难（B' L2 1.348），仍低于 `max_l2` 2.232。这是对已提交 fixtures 的复验，不改 scenario hash。
+
+仓库已公开：https://github.com/davore/PhysicalAIInfra  
+main 分支保护：必须走 PR、必需检查 `gate`、`enforce_admins`。  
+PR #2 仍开着且上次 `gate` 红（勿合）：https://github.com/davore/PhysicalAIInfra/pull/2

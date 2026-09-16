@@ -79,4 +79,4 @@ pytest
 
 ### Bench 附录
 
-`scripts/remote/train_act.py` 只为门禁 bench 冻过一个会跟踪的基线 B'，不再重训。已知答案测试见 `docs/notes/2026-09-15-gate-bench-v2.md`。
+`scripts/remote/train_act.py` 只为门禁 bench 冻过一个会跟踪的基线 B'，不再重训。现行标定见 [docs/notes/2026-09-16-first-gate.md](docs/notes/2026-09-16-first-gate.md)（bounds +15%、max_l2 2.232）。v2 note 是 +10% 时的历史记录。

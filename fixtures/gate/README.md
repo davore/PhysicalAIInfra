@@ -39,3 +39,8 @@ regenerating these files makes the green gate fail (hash mismatch).
 | coffee-published-action-space-mismatch | `…act-coffee-30000__20260915T070515Z` | `…act-aloha-static-coffee-test__20260915T070609Z` |
 
 B' checkpoint: `/root/autodl-tmp/ckpts/v2/act-coffee-30000` (frozen bench fixture, not retrained).
+Intended Hub copy: `davore/act-aloha-static-coffee-bprime` (private). Upload with
+`HF_TOKEN=… python scripts/remote/upload_bprime.py`. Local backup:
+`.cache/bprime/act-coffee-30000` (gitignored). Do not point
+`scenarios/real/*.yaml` `target.checkpoint` at the Hub id — that enters
+`content_hash` and would invalidate these fixtures.
