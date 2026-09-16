@@ -12,6 +12,9 @@ import polars as pl
 
 from robogate.run import Run
 
+ACTION_STATS_KEY = "action"
+STATE_STATS_KEY = "observation.state"
+
 
 def copy_run(src: str | Path, dest: str | Path) -> Path:
     dest_path = Path(dest)
@@ -21,6 +24,67 @@ def copy_run(src: str | Path, dest: str | Path) -> Path:
     return dest_path
 
 
+def apply_dim_bias(arr: np.ndarray, dim: int, value: float) -> np.ndarray:
+    if dim < 0 or dim >= arr.shape[1]:
+        raise ValueError(f"dim {dim} out of range for action width {arr.shape[1]}")
+    out = np.asarray(arr, dtype=np.float64).copy()
+    out[:, dim] += float(value)
+    return out
+
+
+def apply_gain(arr: np.ndarray, gain: float) -> np.ndarray:
+    values = np.asarray(arr, dtype=np.float64)
+    mean = values.mean(axis=0, keepdims=True)
+    return mean + (values - mean) * float(gain)
+
+
+def apply_constant(arr: np.ndarray) -> np.ndarray:
+    values = np.asarray(arr, dtype=np.float64)
+    if len(values) == 0:
+        return values.copy()
+    return np.broadcast_to(values[0], values.shape).copy()
+
+
+def apply_stats_swap(
+    arr: np.ndarray,
+    action_mean: np.ndarray,
+    action_std: np.ndarray,
+    state_mean: np.ndarray,
+    state_std: np.ndarray,
+) -> np.ndarray:
+    values = np.asarray(arr, dtype=np.float64)
+    mean_a = np.asarray(action_mean, dtype=np.float64).reshape(-1)
+    std_a = np.asarray(action_std, dtype=np.float64).reshape(-1)
+    mean_s = np.asarray(state_mean, dtype=np.float64).reshape(-1)
+    std_s = np.asarray(state_std, dtype=np.float64).reshape(-1)
+    width = values.shape[1]
+    if any(vec.shape != (width,) for vec in (mean_a, std_a, mean_s, std_s)):
+        raise ValueError("stats_swap vectors must match action width")
+    safe = np.where(np.abs(std_a) < 1e-12, 1.0, std_a)
+    return (values - mean_a) / safe * std_s + mean_s
+
+
+def load_swap_stats(
+    stats: dict[str, Any] | None = None,
+    stats_path: str | Path | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    payload = stats
+    if payload is None:
+        if stats_path is None:
+            raise ValueError("stats_swap needs stats= or stats_path=")
+        payload = json.loads(Path(stats_path).read_text(encoding="utf-8"))
+    if ACTION_STATS_KEY not in payload or STATE_STATS_KEY not in payload:
+        raise ValueError("stats_swap needs 'action' and 'observation.state' blocks")
+    action = payload[ACTION_STATS_KEY]
+    state = payload[STATE_STATS_KEY]
+    return (
+        _stats_vector(action, "mean"),
+        _stats_vector(action, "std"),
+        _stats_vector(state, "mean"),
+        _stats_vector(state, "std"),
+    )
+
+
 def synth_run(
     src: str | Path,
     dest: str | Path,
@@ -28,10 +92,26 @@ def synth_run(
     kind: str,
     value: float | int | None = None,
     seed: int = 0,
+    dim: int | None = None,
+    stats: dict[str, Any] | None = None,
+    stats_path: str | Path | None = None,
 ) -> Path:
     dest_path = copy_run(src, dest)
     if kind == "bias":
         _map_action(dest_path, lambda arr: arr + float(value or 0.0))
+    elif kind == "dim_bias":
+        if dim is None:
+            raise ValueError("dim_bias requires dim=")
+        _map_action(dest_path, lambda arr: apply_dim_bias(arr, dim, float(value or 0.0)))
+    elif kind == "gain":
+        if value is None:
+            raise ValueError("gain requires value=")
+        _map_action(dest_path, lambda arr: apply_gain(arr, float(value)))
+    elif kind == "stats_swap":
+        mean_a, std_a, mean_s, std_s = load_swap_stats(stats=stats, stats_path=stats_path)
+        _map_action(dest_path, lambda arr: apply_stats_swap(arr, mean_a, std_a, mean_s, std_s))
+    elif kind == "constant":
+        _map_action(dest_path, apply_constant)
     elif kind == "noise":
         rng = np.random.default_rng(seed)
         sigma = float(value or 0.0)
@@ -59,6 +139,12 @@ def corrupt_eval_hashes(src: str | Path, dest: str | Path, digest: str = "sha256
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     table.write_parquet(dest_path)
     return dest_path
+
+
+def _stats_vector(block: Any, key: str) -> np.ndarray:
+    if not isinstance(block, dict) or key not in block:
+        raise ValueError(f"stats block missing {key}")
+    return np.asarray(block[key], dtype=np.float64).reshape(-1)
 
 
 def _map_action(run_dir: Path, fn: Any) -> None:
