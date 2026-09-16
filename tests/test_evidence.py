@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 from typer.testing import CliRunner
 
 from robogate.asserts import AssertResult, Status, run_assertions
@@ -12,6 +13,10 @@ from robogate.eval import run_eval
 from robogate.evidence import (
     TopKFrames,
     WorstFrame,
+    load_action_arrays,
+    nms_worst_indexes,
+    per_frame_l2,
+    rebuild_evidence,
     should_write,
     write_evidence,
 )
@@ -226,6 +231,64 @@ def test_missing_plot_libs_do_not_raise(tmp_path: Path, monkeypatch) -> None:
     assert "frames" in payload["skipped"]
     assert "plot" in payload["skipped"]
     assert not (out / "actions.png").exists()
+
+
+def test_topk_nms_keeps_one_from_plateau(monkeypatch) -> None:
+    calls: list[object] = []
+
+    def stub(image: object) -> np.ndarray:
+        calls.append(image)
+        return np.zeros((2, 2, 3), dtype=np.uint8)
+
+    monkeypatch.setattr("robogate.evidence._to_uint8_hwc", stub)
+    topk = TopKFrames(k=5, min_separation=20)
+    marker = object()
+    for i in range(20):
+        topk.feed(i, 10.0, {"cam": marker})
+    assert len(calls) == 1
+    ranked = topk.ranked()
+    assert [item.index for item in ranked] == [0]
+    assert nms_worst_indexes(np.full(20, 10.0), 5, 20) == [0]
+
+
+def test_write_evidence_adds_tracking_and_plot(tmp_path: Path) -> None:
+    scenario_path, slice_path = _extract(tmp_path)
+    scenario = load_scenario(scenario_path)
+    dest = run_replay(
+        scenario,
+        Slice.load(slice_path),
+        build_adapter("mock"),
+        out_root=tmp_path / "runs",
+        evidence="always",
+    )
+    payload = json.loads((dest / "evidence" / "evidence.json").read_text(encoding="utf-8"))
+    assert payload["tracking"]["per_dim_corr"][0] == pytest.approx(1.0)
+    assert "std_ratio" in payload["tracking"]
+    assert (dest / "evidence" / "actions.png").is_file()
+
+
+def test_rebuild_matches_online_topk(tmp_path: Path) -> None:
+    scenario_path, slice_path = _extract(tmp_path, n_frames=24)
+    scenario = load_scenario(scenario_path)
+    dest = run_replay(
+        scenario,
+        Slice.load(slice_path),
+        build_adapter("mock", noise=0.5),
+        out_root=tmp_path / "runs",
+        evidence="never",
+    )
+    pred, rec, _ = load_action_arrays(Run.load(dest), scenario)
+    l2 = per_frame_l2(pred, rec)
+    sep = 50
+    online = TopKFrames(k=5, min_separation=sep)
+    for index, score in enumerate(l2.tolist()):
+        online.feed(index, float(score), None)
+    rebuild_evidence(scenario, Run.load(dest), slice_=Slice.load(slice_path), force=True)
+    payload = json.loads((dest / "evidence" / "evidence.json").read_text(encoding="utf-8"))
+    exact = nms_worst_indexes(l2, 5, sep)
+    rebuilt = [item["index"] for item in payload["worst_frames"]]
+    assert rebuilt == exact
+    assert [item.index for item in online.ranked()] == exact
 
 
 def test_should_write_modes() -> None:

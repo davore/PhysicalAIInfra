@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import heapq
 import json
 import math
 import shutil
@@ -15,7 +14,7 @@ import numpy as np
 from robogate.asserts import AssertResult, overall_ok, run_assertions
 from robogate.asserts.action_deviation import vectors_from_frame
 from robogate.run import Run
-from robogate.scenario import ActionBounds, Scenario
+from robogate.scenario import ActionBounds, ActionDeviation, Scenario
 from robogate.slice import Slice
 
 DEFAULT_TOP_K = 5
@@ -41,40 +40,94 @@ class WorstFrame:
 class TopKFrames:
     """Keep the k highest-L2 frames; convert images only when a frame enters."""
 
-    def __init__(self, k: int = DEFAULT_TOP_K) -> None:
+    def __init__(self, k: int = DEFAULT_TOP_K, min_separation: int = 0) -> None:
         if k <= 0:
             raise ValueError("k must be positive")
         self.k = k
-        self._heap: list[_HeapItem] = []
+        self.min_separation = max(int(min_separation), 0)
+        self._items: list[_HeapItem] = []
         self._seq = 0
 
+    def _min_item(self) -> _HeapItem | None:
+        if not self._items:
+            return None
+        return min(self._items, key=lambda item: (item.l2, -item.index))
+
+    def _neighbor(self, index: int) -> _HeapItem | None:
+        if self.min_separation <= 0:
+            return None
+        for item in self._items:
+            if abs(item.index - index) < self.min_separation:
+                return item
+        return None
+
     def _would_enter(self, l2: float) -> bool:
-        return len(self._heap) < self.k or float(l2) > self._heap[0].l2
+        lowest = self._min_item()
+        return lowest is None or len(self._items) < self.k or float(l2) > lowest.l2
+
+    def _convert(self, images: dict[str, Any] | None) -> dict[str, np.ndarray] | None:
+        if not images:
+            return None
+        converted: dict[str, np.ndarray] = {}
+        try:
+            for name, image in images.items():
+                converted[str(name)] = _to_uint8_hwc(image)
+        except Exception:  # noqa: BLE001 — evidence is fail-soft
+            return None
+        return converted
 
     def feed(self, index: int, l2: float, images: dict[str, Any] | None) -> None:
         score = float(l2)
-        if not math.isfinite(score) or not self._would_enter(score):
+        if not math.isfinite(score):
             return
-        converted: dict[str, np.ndarray] | None = None
-        if images:
-            converted = {}
-            try:
-                for name, image in images.items():
-                    converted[str(name)] = _to_uint8_hwc(image)
-            except Exception:  # noqa: BLE001 — evidence is fail-soft
-                converted = None
-        item = _HeapItem(l2=score, index=int(index), seq=self._seq, images=converted)
+        neighbor = self._neighbor(index)
+        if neighbor is not None:
+            if score <= neighbor.l2:
+                return
+            converted = self._convert(images)
+            self._items.remove(neighbor)
+            self._items.append(
+                _HeapItem(l2=score, index=int(index), seq=self._seq, images=converted)
+            )
+            self._seq += 1
+            return
+        if not self._would_enter(score):
+            return
+        converted = self._convert(images)
+        self._items.append(_HeapItem(l2=score, index=int(index), seq=self._seq, images=converted))
         self._seq += 1
-        if len(self._heap) < self.k:
-            heapq.heappush(self._heap, item)
-        else:
-            heapq.heapreplace(self._heap, item)
+        if len(self._items) > self.k:
+            lowest = self._min_item()
+            if lowest is not None:
+                self._items.remove(lowest)
 
     def ranked(self) -> list[WorstFrame]:
-        items = sorted(self._heap, key=lambda item: (-item.l2, item.index))
+        items = sorted(self._items, key=lambda item: (-item.l2, item.index))
         return [
             WorstFrame(index=item.index, l2=item.l2, images=item.images) for item in items
         ]
+
+
+def nms_worst_indexes(l2: np.ndarray, k: int, min_separation: int) -> list[int]:
+    scores = np.asarray(l2, dtype=np.float64)
+    order = np.argsort(-scores, kind="stable")
+    selected: list[int] = []
+    sep = max(int(min_separation), 0)
+    for idx in order.tolist():
+        if not math.isfinite(float(scores[idx])):
+            continue
+        if sep and any(abs(int(idx) - other) < sep for other in selected):
+            continue
+        selected.append(int(idx))
+        if len(selected) >= k:
+            break
+    return selected
+
+
+def min_separation_from_fps(fps: float) -> int:
+    if fps <= 0:
+        return 0
+    return max(int(round(fps)), 0)
 
 
 def per_frame_l2(pred: np.ndarray, rec: np.ndarray) -> np.ndarray:
@@ -148,8 +201,18 @@ def write_evidence(
         )
 
     bounds_spec = _bounds_spec(scenario)
+    tracking = tracking_stats(pred_arr, rec_arr)
     try:
-        _write_action_plot(dest / "actions.png", pred_arr, rec_arr, worst_frames, bounds_spec)
+        _write_action_plot(
+            dest / "actions.png",
+            pred_arr,
+            rec_arr,
+            worst_frames,
+            bounds_spec,
+            max_l2=_deviation_max_l2(scenario),
+            l2=l2,
+            tracking=tracking,
+        )
     except Exception as exc:  # noqa: BLE001
         skipped["plot"] = f"{type(exc).__name__}: {exc}"
 
@@ -161,6 +224,7 @@ def write_evidence(
             _worst_frame_payload(item, pred_arr, rec_arr, times) for item in worst_frames
         ],
         "bounds": _bounds_summary(pred_arr, bounds_spec),
+        "tracking": tracking,
         "assertions": [item.to_dict() for item in results],
         "skipped": skipped,
     }
@@ -188,28 +252,35 @@ def rebuild_evidence(
 
     pred, rec, t_ns = load_action_arrays(run, scenario)
     l2 = per_frame_l2(pred, rec)
-    order = np.argsort(-l2)[: min(top_k, len(l2))]
+    sep = min_separation_from_fps(slice_.meta.fps) if slice_ is not None else 0
+    indexes = nms_worst_indexes(l2, top_k, sep)
     decoded: dict[int, dict[str, Any]] | None = None
     frames_reason: str | None = None
     if slice_ is not None:
         decoded, frames_reason = try_decode_worst_frames(
             slice_,
-            [int(i) for i in order.tolist()],
+            indexes,
             dataset_hint=_dataset_hint(scenario),
         )
     else:
         frames_reason = "video not local"
 
-    topk = TopKFrames(k=top_k)
-    for index, score in enumerate(l2.tolist()):
+    worst: list[WorstFrame] = []
+    for index in indexes:
         images = decoded.get(index) if decoded is not None else None
-        topk.feed(index, float(score), images)
+        converted = None
+        if images:
+            try:
+                converted = {name: _to_uint8_hwc(image) for name, image in images.items()}
+            except Exception:  # noqa: BLE001
+                converted = None
+        worst.append(WorstFrame(index=index, l2=float(l2[index]), images=converted))
     results = run_assertions(scenario, run)
     return write_evidence(
         run.path,
         scenario,
         results,
-        topk.ranked(),
+        worst,
         pred,
         rec,
         t_ns,
@@ -296,12 +367,53 @@ def _write_frame_pngs(dest: Path, worst_frames: list[WorstFrame]) -> bool:
     return True
 
 
+def tracking_stats(pred: np.ndarray, rec: np.ndarray) -> dict[str, Any]:
+    left = np.asarray(pred, dtype=np.float64)
+    right = np.asarray(rec, dtype=np.float64)
+    n = min(len(left), len(right))
+    dim = min(left.shape[1], right.shape[1]) if n and left.ndim == 2 and right.ndim == 2 else 0
+    if n == 0 or dim == 0:
+        return {
+            "per_dim_corr": [],
+            "median_corr": 0.0,
+            "std_pred": [],
+            "std_rec": [],
+            "std_ratio": [],
+            "mean_abs_diff_per_dim": [],
+        }
+    left, right = left[:n, :dim], right[:n, :dim]
+    corrs: list[float] = []
+    for d in range(dim):
+        if left[:, d].std() < 1e-8 or right[:, d].std() < 1e-8:
+            corrs.append(0.0)
+            continue
+        corrs.append(float(np.corrcoef(left[:, d], right[:, d])[0, 1]))
+    std_pred = left.std(axis=0)
+    std_rec = right.std(axis=0)
+    ratio = [
+        float(p / r) if r > 1e-12 else 0.0
+        for p, r in zip(std_pred.tolist(), std_rec.tolist(), strict=True)
+    ]
+    return {
+        "per_dim_corr": corrs,
+        "median_corr": float(np.median(corrs)),
+        "std_pred": [float(v) for v in std_pred.tolist()],
+        "std_rec": [float(v) for v in std_rec.tolist()],
+        "std_ratio": ratio,
+        "mean_abs_diff_per_dim": np.mean(np.abs(left - right), axis=0).astype(float).tolist(),
+    }
+
+
 def _write_action_plot(
     dest: Path,
     pred: np.ndarray,
     rec: np.ndarray,
     worst_frames: list[WorstFrame],
     bounds: ActionBounds | None,
+    *,
+    max_l2: float | None = None,
+    l2: np.ndarray | None = None,
+    tracking: dict[str, Any] | None = None,
 ) -> None:
     plt = _load_mpl()
     n = min(pred.shape[1] if pred.ndim == 2 else 0, rec.shape[1] if rec.ndim == 2 else 0)
@@ -311,31 +423,58 @@ def _write_action_plot(
     xs = np.arange(length)
     cols = 2 if n > 1 else 1
     rows = int(math.ceil(n / cols))
-    fig, axes = plt.subplots(
-        rows,
-        cols,
-        figsize=(10, max(2.2 * rows, 3.0)),
-        squeeze=False,
-        layout="constrained",
-    )
+    fig = plt.figure(figsize=(10, 2.2 + 2.0 * rows), layout="constrained")
+    grid = fig.add_gridspec(rows + 1, cols, height_ratios=[1.3] + [1.0] * rows)
+    scores = np.asarray(l2 if l2 is not None else per_frame_l2(pred, rec), dtype=np.float64)
+    ax_l2 = fig.add_subplot(grid[0, :])
+    ax_l2.plot(xs, scores[:length], color="C1", linewidth=1.0, label="frame L2")
+    if length:
+        ax_l2.axhline(
+            float(np.mean(scores[:length])),
+            color="0.35",
+            linestyle=":",
+            linewidth=0.8,
+            label="mean L2",
+        )
+    if max_l2 is not None:
+        ax_l2.axhline(float(max_l2), color="C3", linestyle="--", linewidth=0.8, label="max_l2")
+    marks = [item.index for item in worst_frames if 0 <= item.index < length]
+    for index in marks:
+        ax_l2.axvline(index, color="C3", linewidth=0.8, alpha=0.7)
+    ax_l2.set_ylabel("L2")
+    ax_l2.grid(True, alpha=0.25)
+    ax_l2.legend(loc="upper right", fontsize=8)
+
+    stats = tracking or tracking_stats(pred, rec)
+    corrs = list(stats.get("per_dim_corr") or [])
+    mean_abs = list(stats.get("mean_abs_diff_per_dim") or [])
+    overflow = None
+    if bounds is not None:
+        try:
+            overflow = bounds_violations(pred[:length], bounds)
+        except Exception:  # noqa: BLE001
+            overflow = None
     low = np.asarray(bounds.min, dtype=np.float64) if bounds is not None else None
     high = np.asarray(bounds.max, dtype=np.float64) if bounds is not None else None
-    marks = [item.index for item in worst_frames if 0 <= item.index < length]
     for dim in range(n):
-        ax = axes[dim // cols][dim % cols]
+        ax = fig.add_subplot(grid[1 + dim // cols, dim % cols])
         ax.plot(xs, rec[:length, dim], color="0.45", linewidth=1.0, label="recorded")
         ax.plot(xs, pred[:length, dim], color="C0", linewidth=1.0, label="pred")
         if low is not None and high is not None and dim < len(low):
-            ax.fill_between(
-                xs, float(low[dim]), float(high[dim]), color="C0", alpha=0.12, linewidth=0
-            )
+            ax.axhline(float(low[dim]), color="0.5", linestyle="--", linewidth=0.7)
+            ax.axhline(float(high[dim]), color="0.5", linestyle="--", linewidth=0.7)
+        if overflow is not None and dim < overflow.shape[1]:
+            hit = np.abs(overflow[:, dim]) > 1e-12
+            if bool(np.any(hit)):
+                ax.scatter(xs[hit], pred[:length, dim][hit], s=8, c="C3", zorder=3)
         for index in marks:
             ax.axvline(index, color="C3", linewidth=0.8, alpha=0.7)
-        ax.set_ylabel(f"d{dim}")
+        corr = corrs[dim] if dim < len(corrs) else 0.0
+        delta = mean_abs[dim] if dim < len(mean_abs) else 0.0
+        ax.set_ylabel(f"d{dim}  corr={corr:.2f}  mean|Δ|={delta:.2f}")
         ax.grid(True, alpha=0.25)
-    for dim in range(n, rows * cols):
-        axes[dim // cols][dim % cols].axis("off")
-    axes[0][0].legend(loc="upper right", fontsize=8)
+        if dim == 0:
+            ax.legend(loc="upper right", fontsize=7)
     fig.suptitle("pred vs recorded")
     fig.savefig(dest, dpi=120)
     plt.close(fig)
@@ -383,6 +522,13 @@ def _bounds_spec(scenario: Scenario) -> ActionBounds | None:
     for spec in scenario.expected:
         if isinstance(spec, ActionBounds):
             return spec
+    return None
+
+
+def _deviation_max_l2(scenario: Scenario) -> float | None:
+    for spec in scenario.expected:
+        if isinstance(spec, ActionDeviation):
+            return float(spec.max_l2)
     return None
 
 

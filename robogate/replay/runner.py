@@ -9,7 +9,13 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from robogate.evidence import DEFAULT_TOP_K, TopKFrames, should_write, write_evidence
+from robogate.evidence import (
+    DEFAULT_TOP_K,
+    TopKFrames,
+    min_separation_from_fps,
+    should_write,
+    write_evidence,
+)
 from robogate.replay.base import Adapter, AdapterInfo
 from robogate.run import Run, RunMeta, RunMode, write_meta
 from robogate.scenario import Scenario, content_hash
@@ -37,7 +43,9 @@ def run_replay(
     predicted: list[list[float]] = []
     latency: list[float] = []
     confidence: list[float | None] = []
-    topk = TopKFrames(k=DEFAULT_TOP_K)
+    topk = TopKFrames(
+        k=DEFAULT_TOP_K, min_separation=min_separation_from_fps(slice_.meta.fps)
+    )
     for i in range(n):
         obs = _frame_obs(slice_, i)
         print(f"[replay] scenario 1/1 frame {i + 1}/{n}", flush=True)
