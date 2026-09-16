@@ -42,9 +42,13 @@ def build_adapter(
     specs = parse_perturbations(perturbations)
     name = (entry or "lerobot").strip()
     if name in {"mock", "identity"}:
-        input_specs = {key: specs[key] for key in ("drop_camera", "state_noise") if key in specs}
+        input_specs = {
+            key: specs[key]
+            for key in ("drop_camera", "state_noise", "action_stats")
+            if key in specs
+        }
         if input_specs:
-            raise ValueError("drop_camera/state_noise require the lerobot adapter")
+            raise ValueError("drop_camera/state_noise/action_stats require the lerobot adapter")
         inner: Adapter = MockAdapter(noise=noise)
     elif name == "lerobot":
         from robogate.replay.lerobot_policy import LeRobotPolicyAdapter
@@ -52,6 +56,7 @@ def build_adapter(
         inner = LeRobotPolicyAdapter(
             drop_camera=specs.get("drop_camera"),
             state_noise=float(specs["state_noise"]) if "state_noise" in specs else 0.0,
+            action_stats=specs.get("action_stats"),
         )
     elif ":" in name:
         inner = _load_callable_adapter(name)
@@ -61,6 +66,7 @@ def build_adapter(
         inner = LeRobotPolicyAdapter(
             drop_camera=specs.get("drop_camera"),
             state_noise=float(specs["state_noise"]) if "state_noise" in specs else 0.0,
+            action_stats=specs.get("action_stats"),
         )
     action_specs = {key: specs[key] for key in ACTION_KEYS if key in specs}
     if action_specs:
