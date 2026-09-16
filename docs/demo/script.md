@@ -8,7 +8,7 @@
 
 ## 0:20–1:10 切事故窗
 
-公开 coffee 数据上，发布 ACT 把 action 解到 `observation.state` 空间。把 L2 最高的 5 秒冻成 scenario：
+公开 coffee 数据上，发布 ACT 不跟踪示教，统计量也贴错。把 L2 最高的 5 秒冻成 scenario：
 
 ```bash
 robogate extract lerobot lerobot/aloha_static_coffee \

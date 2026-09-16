@@ -1,4 +1,4 @@
-# 2026-09-15 发现发布权重把 action 解到 observation.state 空间
+# 2026-09-15 发现发布权重不跟踪 coffee，统计量也贴错
 # window: ep0 frames 413-663 (5.0s @ 50fps), max published-B mean L2
 # thresholds from eval_id=Bp
 # max_l2=mean+3σ=2.2324058120691306
