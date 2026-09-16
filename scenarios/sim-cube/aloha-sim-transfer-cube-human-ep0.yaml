@@ -1,0 +1,81 @@
+# Train-set tracking positive control, not a hold-out eval.
+# Official ACT trained on all 50 episodes of aloha_sim_transfer_cube_human.
+# thresholds from eval_id=cube-official
+# max_l2=mean+3σ=0.2130321496814231
+# max_delta=mean+3σ=0.6082825621897964
+# bounds=recorded+15%
+# max_lag_frames=7
+schema_version: 0
+id: aloha-sim-transfer-cube-human-ep0
+blocking: true
+source:
+  kind: lerobot
+  dataset: lerobot/aloha_sim_transfer_cube_human
+  episode_index: 0
+  frame_from: 0
+  frame_to: 400
+  revision: 6a43d500f101255823a9d2b9dc244eeb01a2cd31
+tags:
+- lerobot
+- open-loop
+- train-set-tracking
+inputs:
+- observation.images.top
+- observation.state
+target:
+  adapter: python-policy
+  entry: lerobot
+  checkpoint: lerobot/act_aloha_sim_transfer_cube_human
+  revision: ba73b2766f1371cdc133ca4efb97eb090d744625
+expected:
+- type: action_deviation
+  topic: action
+  reference: recorded
+  max_l2: 0.2130321496814231
+  metric: l2
+- type: latency
+  topic: /policy/action
+  p95_ms: 80.0
+- type: confidence_floor
+  topic: /policy/action
+  min_confidence: 0.3
+- type: action_bounds
+  topic: action
+  min:
+  - -0.051388355816015974
+  - -1.0799991998821497
+  - 0.602547687292099
+  - -0.1835408024955541
+  - -0.812933149933815
+  - -0.34760005250573156
+  - 0.0170073874294758
+  - -0.23462236151099203
+  - -1.1661322548985482
+  - 0.45697290897369386
+  - -1.6663633814081549
+  - -0.9960137210786343
+  - -1.5767788290977478
+  - 0.025131963938474666
+  max:
+  - 0.008436894306214526
+  - 0.010814561322331412
+  - 1.2965205490589142
+  - 0.037812626967206595
+  - -0.2286398380994797
+  - 0.09909516051411629
+  - 1.2881622992455959
+  - 0.38955442830920217
+  - 0.4052777424454689
+  - 1.3224448442459107
+  - 0.25203305166214707
+  - 0.36401364728808405
+  - 1.5859827399253845
+  - 1.3537188686430455
+- type: action_smoothness
+  topic: action
+  max_delta: 0.6082825621897964
+- type: action_lag
+  topic: action
+  reference: recorded
+  max_lag_frames: 7
+  search_frames: 50

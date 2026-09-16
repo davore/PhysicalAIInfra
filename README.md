@@ -18,7 +18,7 @@ conda activate robogate
 pip install -e ".[dev]"
 ```
 
-真实 ACT 回放另装可选 extra（通常在远端 GPU）。RTX 5090 必须先装 torch cu128，再 `pip install --no-deps lerobot`；不要直接 `pip install -e ".[lerobot]"`。`scripts/remote/setup_env.sh` 按这个顺序装。远端 Hugging Face 走 `HF_ENDPOINT=https://hf-mirror.com`。
+真实 ACT 回放另装可选 extra（通常在远端 GPU）。RTX 5090 必须先装 torch cu128，再 `pip install --no-deps lerobot`；不要直接 `pip install -e ".[lerobot]"`。`scripts/remote/setup_env.sh` 按这个顺序装。远端 Hugging Face 走 `HF_ENDPOINT=https://hf-mirror.com`，并设 `HF_HUB_DISABLE_XET=1`（Xet CAS 会打到 huggingface.co 并 401）。
 
 ## Incident → Gate
 
@@ -75,7 +75,7 @@ conda activate robogate
 pytest
 ```
 
-计划见 [PLAN.md](PLAN.md)。首个门禁记录见 [docs/notes/2026-09-16-first-gate.md](docs/notes/2026-09-16-first-gate.md)。
+计划见 [PLAN.md](PLAN.md)。首个门禁记录见 [docs/notes/2026-09-16-first-gate.md](docs/notes/2026-09-16-first-gate.md)。第二个已知答案（官方 sim transfer cube ACT）见 [docs/notes/2026-09-17-second-known-answer.md](docs/notes/2026-09-17-second-known-answer.md)。
 
 ### Bench 附录
 

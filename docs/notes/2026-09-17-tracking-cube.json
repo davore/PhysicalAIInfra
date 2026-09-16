@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "frame0_std": 0.5880172146318947,
+  "median_corr": 0.9921908587384967,
+  "mean_l2": 0.11844705251884209,
+  "l2_limit": 1.6289087263068647,
+  "by_scenario_l2": {
+    "aloha-sim-transfer-cube-human-ep0": 0.14964808397934287,
+    "aloha-sim-transfer-cube-human-ep1": 0.08091674530937933,
+    "aloha-sim-transfer-cube-human-ep2": 0.17806219632501552,
+    "aloha-sim-transfer-cube-human-ep3": 0.14851242130725775,
+    "aloha-sim-transfer-cube-human-ep4": 0.10117737954326131,
+    "aloha-sim-transfer-cube-human-ep5": 0.12755395851905948,
+    "aloha-sim-transfer-cube-human-ep6": 0.09510165868246294,
+    "aloha-sim-transfer-cube-human-ep7": 0.08773876111145305,
+    "aloha-sim-transfer-cube-human-ep8": 0.10524365625229146,
+    "aloha-sim-transfer-cube-human-ep9": 0.11051566415889741
+  },
+  "by_scenario_corr": {
+    "aloha-sim-transfer-cube-human-ep0": 0.9761249888107788,
+    "aloha-sim-transfer-cube-human-ep1": 0.9937800897149376,
+    "aloha-sim-transfer-cube-human-ep2": 0.985389451642799,
+    "aloha-sim-transfer-cube-human-ep3": 0.9853508000881637,
+    "aloha-sim-transfer-cube-human-ep4": 0.9953843161669707,
+    "aloha-sim-transfer-cube-human-ep5": 0.9932036083748316,
+    "aloha-sim-transfer-cube-human-ep6": 0.9918153779568677,
+    "aloha-sim-transfer-cube-human-ep7": 0.9952919912226884,
+    "aloha-sim-transfer-cube-human-ep8": 0.9925575887157693,
+    "aloha-sim-transfer-cube-human-ep9": 0.9918241287612242
+  }
+}

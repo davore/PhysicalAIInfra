@@ -44,10 +44,10 @@ def _latest_run(runs_root: Path, scenario_id: str, *, needle: str) -> Path:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    suite = root / "scenarios" / "real"
-    runs = root / "runs"
-    results = root / "results"
-    slices = root / "slices"
+    suite = Path(os.environ.get("SUITE", root / "scenarios" / "real"))
+    runs = Path(os.environ.get("RUNS", root / "runs"))
+    results = Path(os.environ.get("RESULTS", root / "results"))
+    slices = Path(os.environ.get("SLICES", root / "slices"))
     mutants = root / "runs" / "mutants"
     mutants.mkdir(parents=True, exist_ok=True)
     results.mkdir(parents=True, exist_ok=True)
