@@ -20,6 +20,7 @@ class LeRobotPolicyAdapter(Adapter):
         *,
         drop_camera: str | None = None,
         state_noise: float = 0.0,
+        action_stats: str | None = None,
         seed: int = 0,
     ) -> None:
         self.info = AdapterInfo(name="lerobot")
@@ -32,6 +33,9 @@ class LeRobotPolicyAdapter(Adapter):
         self._input_keys: list[str] = []
         self._drop_camera = drop_camera
         self._state_noise = float(state_noise)
+        if action_stats is not None and action_stats != "dataset":
+            raise ValueError("action_stats must be 'dataset'")
+        self._action_stats = action_stats
         self._rng = np.random.default_rng(seed)
 
     def load(self, target: Target, slice_: Slice, *, device: str) -> None:
@@ -83,6 +87,7 @@ class LeRobotPolicyAdapter(Adapter):
             device=device,
             dataset=dataset,
             policy=policy,
+            action_stats=self._action_stats,
         )
         self._policy = policy
         self._preprocessor = preprocessor
@@ -264,11 +269,38 @@ def resolve_processors(
     device: str,
     dataset: Any,
     policy: Any,
+    action_stats: str | None = None,
 ) -> tuple[Any, Any, str]:
     """Load processors from the checkpoint, or build them from dataset.meta.stats."""
+    if action_stats is not None and action_stats != "dataset":
+        raise ValueError("action_stats must be 'dataset'")
     if checkpoint_has_processors(checkpoint, revision):
-        return (*_load_processors(checkpoint, revision=revision, device=device), "checkpoint")
+        preprocessor, postprocessor = _load_processors(
+            checkpoint, revision=revision, device=device
+        )
+        source = "checkpoint"
+        if action_stats == "dataset":
+            action = (dataset_stats(dataset).get("action") or {})
+            if not action:
+                raise RuntimeError("dataset.meta.stats['action'] missing; cannot align processors")
+            align_action_stats(preprocessor, action, device)
+            align_action_stats(postprocessor, action, "cpu")
+            source = "checkpoint+dataset_action"
+        return preprocessor, postprocessor, source
     return (*processors_from_dataset_stats(dataset, policy, device), "dataset_stats")
+
+
+def align_action_stats(pipe: Any, action_stats: dict[str, Any], device: str) -> None:
+    """Replace checkpoint action mean/std with the dataset's, then refresh tensors."""
+    if pipe is None or not action_stats:
+        return
+    for step in getattr(pipe, "steps", None) or []:
+        stats = getattr(step, "stats", None)
+        if not isinstance(stats, dict) or "action" not in stats:
+            continue
+        stats["action"] = {key: np.asarray(value) for key, value in action_stats.items()}
+        if hasattr(step, "to"):
+            step.to(device)
 
 
 def checkpoint_has_processors(checkpoint: str, revision: str | None = None) -> bool:

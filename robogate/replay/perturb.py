@@ -12,7 +12,7 @@ from robogate.scenario import Target
 from robogate.slice import Slice
 
 ACTION_KEYS = ("action_noise", "action_bias", "action_lag", "action_scale")
-INPUT_KEYS = ("drop_camera", "state_noise")
+INPUT_KEYS = ("drop_camera", "state_noise", "action_stats")
 KNOWN_KEYS = ACTION_KEYS + INPUT_KEYS
 
 
@@ -26,6 +26,8 @@ def parse_perturbations(items: list[str] | None) -> dict[str, str]:
     unknown = [key for key in out if key not in KNOWN_KEYS]
     if unknown:
         raise ValueError(f"unknown perturbation keys: {unknown}; expected {list(KNOWN_KEYS)}")
+    if "action_stats" in out and out["action_stats"] != "dataset":
+        raise ValueError("action_stats must be 'dataset'")
     return out
 
 

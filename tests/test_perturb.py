@@ -4,9 +4,11 @@ from pathlib import Path
 
 import numpy as np
 import polars as pl
+import pytest
 
+from robogate.replay import build_adapter
 from robogate.replay.mock import MockAdapter
-from robogate.replay.perturb import PerturbedAdapter
+from robogate.replay.perturb import PerturbedAdapter, parse_perturbations
 from robogate.scenario import Target
 from robogate.slice import Slice, SliceMeta, write_slice_meta
 
@@ -66,3 +68,14 @@ def test_l2_grows_with_bias_and_noise(tmp_path: Path) -> None:
     assert l2({"action_noise": "0.0"}) <= l2({"action_noise": "0.2"})
     assert l2({"action_lag": "0"}) <= l2({"action_lag": "3"})
     assert l2({"action_scale": "1.0"}) <= l2({"action_scale": "1.5"})
+
+
+def test_parse_action_stats_dataset_only() -> None:
+    assert parse_perturbations(["action_stats=dataset"])["action_stats"] == "dataset"
+    with pytest.raises(ValueError, match="action_stats"):
+        parse_perturbations(["action_stats=checkpoint"])
+
+
+def test_action_stats_requires_lerobot() -> None:
+    with pytest.raises(ValueError, match="action_stats"):
+        build_adapter("mock", perturbations=["action_stats=dataset"])
