@@ -1,5 +1,7 @@
 # Robogate 门禁 benchmark v2（2026-09-15）
 
+> 标定已被 [2026-09-16-first-gate.md](./2026-09-16-first-gate.md) 取代：bounds +15%、max_l2 2.232、B' 11/11。本文数字是 +10% 时的历史值。2026-09-16 GPU 复验见 [2026-09-16-gpu-verify.json](./2026-09-16-gpu-verify.json)。
+
 HTML 版：[2026-09-15-gate-bench-v2.html](./2026-09-15-gate-bench-v2.html)
 
 第二轮：修 lag 盲区、改 bounds 来源、诊断发布 ACT 的归一化错位，并重训带 shuffle 的 ACT。

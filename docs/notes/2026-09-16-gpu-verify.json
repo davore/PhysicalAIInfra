@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-16",
+  "host": "microbo-gpu",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "device": "cuda",
+  "note": "Shared GPU with MicroBo FDTD jobs; this verify waited then ran 11:36–12:16 CST.",
+  "holdout": "lerobot/aloha_static_coffee ep0-9",
+  "bprime": {
+    "checkpoint": "/root/autodl-tmp/ckpts/v2/act-coffee-30000",
+    "hub_intended": "davore/act-aloha-static-coffee-bprime",
+    "eval_id": "T30k",
+    "overall": true,
+    "n": 10,
+    "tracking": {
+      "ok": true,
+      "frame0_std": 0.6086735624919826,
+      "median_corr": 0.902378864348159,
+      "mean_l2": 0.5844770665382073,
+      "l2_limit": 1.836
+    },
+    "by_scenario_l2": {
+      "aloha-static-coffee-ep0": 1.3482922174500105,
+      "aloha-static-coffee-ep1": 0.6267797762439372,
+      "aloha-static-coffee-ep2": 0.6176481041247277,
+      "aloha-static-coffee-ep3": 0.4111676749607713,
+      "aloha-static-coffee-ep4": 0.41373158082279105,
+      "aloha-static-coffee-ep5": 0.6481392370151609,
+      "aloha-static-coffee-ep6": 0.505853561247614,
+      "aloha-static-coffee-ep7": 0.3959202943344079,
+      "aloha-static-coffee-ep8": 0.467675867111689,
+      "aloha-static-coffee-ep9": 0.4095623520709633
+    }
+  },
+  "published": {
+    "checkpoint": "gozdebaydogmus/act-aloha-static-coffee-test",
+    "revision": "646846823c8473712f689f59bdd03f798a688f6a",
+    "eval_id": "B-published",
+    "overall": false,
+    "n": 10,
+    "tracking": {
+      "ok": false,
+      "frame0_std": 0.6455056756069071,
+      "median_corr": -0.005451696724402103,
+      "mean_l2": 2.286716060952146,
+      "l2_limit": 1.836
+    }
+  },
+  "gate_bprime_to_published": {
+    "ok": false,
+    "n_scenarios": 10,
+    "n_regressions": 10,
+    "pred_shift_unique": [0]
+  },
+  "mutant_lag10_pred_shift_unique": [10],
+  "t2k_overall": false,
+  "t10k_overall": true,
+  "ranking_consistency": {"n": 10, "n_consistent": 7, "rate": 0.7}
+}
