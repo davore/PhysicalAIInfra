@@ -1,0 +1,199 @@
+{
+  "scenario_id": "coffee-published-action-space-mismatch",
+  "run_id": "coffee-published-action-space-mismatch__act-aloha-static-coffee-test__20260915T070609Z",
+  "mean_l2": 3.0256253103630097,
+  "worst_frames": [
+    {
+      "index": 61,
+      "t_ns": 9480000000,
+      "l2": 3.3413593349851554,
+      "per_dim_abs_diff": [
+        0.36393850296735764,
+        0.841931164264679,
+        0.0529596209526062,
+        0.8632306754589081,
+        0.5628593564033508,
+        2.9389575719833374,
+        0.3828983008861542,
+        0.4148893356323242,
+        0.10538756847381592,
+        0.179706871509552,
+        0.0018795020878314972,
+        0.4974244385957718,
+        0.013884961605072021,
+        0.10656422935426235
+      ],
+      "files": [
+        "frame_0061_cam_high.png",
+        "frame_0061_cam_left_wrist.png",
+        "frame_0061_cam_low.png",
+        "frame_0061_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 72,
+      "t_ns": 9700000000,
+      "l2": 3.3341082483750637,
+      "per_dim_abs_diff": [
+        0.36939843744039536,
+        0.8300428688526154,
+        0.05407977104187012,
+        0.8652091026306152,
+        0.5428988337516785,
+        2.938767671585083,
+        0.3749755620956421,
+        0.4159615486860275,
+        0.08994811773300171,
+        0.1764426827430725,
+        0.00443442165851593,
+        0.49459122121334076,
+        0.01814248040318489,
+        0.10209212452173233
+      ],
+      "files": [
+        "frame_0072_cam_high.png",
+        "frame_0072_cam_left_wrist.png",
+        "frame_0072_cam_low.png",
+        "frame_0072_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 68,
+      "t_ns": 9620000000,
+      "l2": 3.3329660989474257,
+      "per_dim_abs_diff": [
+        0.3676540181040764,
+        0.8271705806255341,
+        0.06646186113357544,
+        0.864617645740509,
+        0.5698661208152771,
+        2.9310089349746704,
+        0.37960997223854065,
+        0.41729169711470604,
+        0.11145824193954468,
+        0.18276089429855347,
+        0.00010354071855545044,
+        0.4954971373081207,
+        0.01689116284251213,
+        0.10898364335298538
+      ],
+      "files": [
+        "frame_0068_cam_high.png",
+        "frame_0068_cam_left_wrist.png",
+        "frame_0068_cam_low.png",
+        "frame_0068_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 63,
+      "t_ns": 9520000000,
+      "l2": 3.332525544997965,
+      "per_dim_abs_diff": [
+        0.36716630309820175,
+        0.8421974182128906,
+        0.052331387996673584,
+        0.8666825294494629,
+        0.5593828558921814,
+        2.9315067529678345,
+        0.3668779134750366,
+        0.41522371768951416,
+        0.10298764705657959,
+        0.16881781816482544,
+        0.0033270642161369324,
+        0.49268947541713715,
+        0.016107022762298584,
+        0.10941318236291409
+      ],
+      "files": [
+        "frame_0063_cam_high.png",
+        "frame_0063_cam_left_wrist.png",
+        "frame_0063_cam_low.png",
+        "frame_0063_cam_right_wrist.png"
+      ]
+    },
+    {
+      "index": 64,
+      "t_ns": 9540000000,
+      "l2": 3.332267838879011,
+      "per_dim_abs_diff": [
+        0.3718753084540367,
+        0.843245267868042,
+        0.061659932136535645,
+        0.8663639724254608,
+        0.561007559299469,
+        2.9277970790863037,
+        0.37171410024166107,
+        0.4164648801088333,
+        0.10434317588806152,
+        0.18475109338760376,
+        0.0002941414713859558,
+        0.4960009753704071,
+        0.015835553407669067,
+        0.10314442776143551
+      ],
+      "files": [
+        "frame_0064_cam_high.png",
+        "frame_0064_cam_left_wrist.png",
+        "frame_0064_cam_low.png",
+        "frame_0064_cam_right_wrist.png"
+      ]
+    }
+  ],
+  "bounds": {
+    "n_frames_out": 250,
+    "dims_out": [
+      1,
+      4
+    ],
+    "worst_frame": 137
+  },
+  "assertions": [
+    {
+      "type": "action_deviation",
+      "status": "fail",
+      "measured": 3.0256253103630097,
+      "threshold": 2.2324058120691306,
+      "message": "mean L2=3.025625 exceeds max_l2=2.2324058120691306",
+      "topic": "action"
+    },
+    {
+      "type": "latency",
+      "status": "pass",
+      "measured": 80.87604772299528,
+      "threshold": 80.0,
+      "message": "p95=80.88ms exceeds budget 80.0ms on non-target hardware; informational, not blocking",
+      "topic": "/policy/action"
+    },
+    {
+      "type": "confidence_floor",
+      "status": "skipped",
+      "threshold": 0.3,
+      "message": "adapter did not record confidence",
+      "topic": "/policy/action"
+    },
+    {
+      "type": "action_bounds",
+      "status": "fail",
+      "measured": 0.1695004291832447,
+      "message": "actions leave bounds (max overflow L2=0.169500)",
+      "topic": "action"
+    },
+    {
+      "type": "action_smoothness",
+      "status": "pass",
+      "measured": 0.24906628162147318,
+      "threshold": 1.4456728495040385,
+      "message": "max frame delta L2=0.249066 (max_delta=1.4456728495040385)",
+      "topic": "action"
+    },
+    {
+      "type": "action_lag",
+      "status": "pass",
+      "measured": 0.0,
+      "threshold": 14.0,
+      "message": "tracking too weak to measure lag (best k=0 improves L2 by 0.0%)",
+      "topic": "action"
+    }
+  ],
+  "skipped": {}
+}
